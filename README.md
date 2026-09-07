@@ -1,0 +1,95 @@
+# Heart Collection
+
+An original, responsive React + Vite + JavaScript prototype for Rose and Praew. Open the app directly into two magical collections and their shared Grand Heart. This is a local demo: no money is charged, no real payment credentials are requested, and no supporter data is sent to a server.
+
+## Run locally
+
+Use Node.js 22.12+ (tested with Node 24).
+
+```sh
+cd heart-collection
+npm install
+npm run dev
+```
+
+Open the localhost address printed by Vite. The workspace preview currently uses port 5179.
+
+```sh
+npm test
+npm run build
+npm run preview
+```
+
+`npm test` uses Node's built-in test runner. It checks consistent seed totals, prices, amount-mode calculations, validation, anonymous search privacy, persistence, event emission, exact milestone crossings, and simulated payment failure.
+
+## Deploy to Vercel
+
+Import the containing repository, set **Root Directory** to `heart-collection`, select the Vite framework, and use `npm run build` with output directory `dist`. This folder contains its own package manifest, lockfile, and Vercel configuration. No environment variables are needed for the prototype. Deployment has not been performed.
+
+## Experience
+
+- Rose starts with 235 hearts, Praew with 234. All counts come from 469 individual seed donation records.
+- Five-step donation flow: recipient, heart and quantity, supporter note, review, demo payment.
+- A crystal heart flies to the selected jar, the jar glows, and the counts update on arrival. Quantities from 1 to 100 are supported.
+- The four standard hearts have data-driven prices. A 31-heart donation from the fresh demo triggers the first shared discovery at 500.
+- Special hearts are **community discoveries** in the collection book, not additional paid donation options. They remain silhouettes until unlocked.
+- Room collectibles unlock independently for each artist and appear as SVG props. The rabbit for Rose and alpaca for Praew are present from the first heart and react to greetings and incoming donations. At 100 hearts they wear a bow, at 500 they learn a shuffle, at 750 they receive a companion charm, and at 1,500 a crown. The shared room upgrade activates at 3,000 combined hearts.
+- Search by supporter name, social username, or donation ID. Results group matching display names, which are not authenticated identities. Anonymous names and handles are not searchable.
+- Click the next magical item beneath a jar to preview its placement in the real room. The preview strip lets you inspect every room collectible, its description, and the remaining hearts. Previewing never adds donations or unlocks items. Companion charms preview directly on the animal.
+- The collection book includes Heart Collection, Rose Items, Praew Items, and Shared Magic tabs (the Magic Cabinet).
+- Mobile shows the Grand Heart first, collection-room tabs, a fixed bottom navigation, and bottom-sheet dialogs.
+- Download PNG share cards or use native sharing when supported. The app never posts automatically.
+
+## Configuration
+
+| File | Change here |
+| --- | --- |
+| `src/data/heartTypes.js` | Standard heart names, meanings, colors, and THB prices |
+| `src/data/specialHearts.js` | Special discoveries, colors, meanings, and unlock thresholds |
+| `src/data/milestones.js` | Shared thresholds and milestone names |
+| `src/data/collectibleItems.js` | Per-artist props and thresholds |
+| `src/data/characters.js` | Artist names, room subtitles, and licensed artwork paths |
+| `src/data/mockDonations.js` | Deterministic demo records and supporter names |
+| `src/data/audioConfig.js` | Audio files and volume |
+| `src/styles/index.css` | Typography, rose/moon and peach/sun themes, layout, motion |
+
+To change a price, edit its `price` property; components never contain donation prices. To add a standard heart, add a definition with a unique `id`, and update the seed count arrays in `mockDonations.js` so they match the definition order. Stats and selectors derive their entries from the definitions. Add special discoveries separately in `specialHearts.js` and align the desired shared milestone in `milestones.js`.
+
+Add room objects to `collectibleItems.js`. Reuse a supported `kind` (`ribbon`, `potion`, `wand`, `rabbit`, `cat`, `mirror`, `crystal`, `crown`, `book`), or extend `Prop` in `components/Artwork.jsx` and position the new item with CSS. To replace placeholder scenery with licensed art, place files under `public/artwork` and set each character's `artwork` URL. Original SVG jars, gems, and room decorations remain available as separate editable components.
+
+`resolveHearts` implements fixed-price Mode A and an isolated exact-change Mode B calculator. The current UI and donation service use Mode A. Before enabling Mode B, save every returned allocation as a line item in one verified transaction; do not silently discard leftover THB or use only the first allocation.
+
+## Audio
+
+The included WAV files are original procedural celesta tones, generated by `node scripts/generate-audio.mjs`. No third-party recordings are used. Music starts only after a click, loops at 27% volume, and fades in and out. The saved preference never overrides browser autoplay restrictions. Optional arrival, drop, unlock, and sparkle WAV files are included as integration-ready assets; sound effects are not automatically played.
+
+To use a supplied MP3, put it at `public/audio/magical-theme.mp3` and change `audioConfig.music` to `/audio/magical-theme.mp3`. The same approach supports `heart-arrive.mp3`, `heart-drop.mp3`, `unlock.mp3`, and `sparkle.mp3`. Missing or invalid music is handled by disabling the music control. No placeholder file pretends to contain valid audio.
+
+## Data, persistence, and errors
+
+`donationService.js` owns record validation, storage, search, statistics, and the subscription boundary. `paymentService.js` owns the delayed simulation; call `simulatePayment({fail:true})` to test the failure path. `progressionService.js` derives unlocked state from totals, so discoveries and room items survive refresh without a second, inconsistent stored counter.
+
+Only new demo donations are saved at `heart-collection.donations.v1`. The immutable seed data is merged on read. Music preference and dismissed help state have separate namespaced keys. If storage is corrupt or inaccessible, the archive error screen offers Retry; no saved data is silently erased. A failed storage write displays a retryable donation error. To reset your own test demo, remove only `heart-collection.donations.v1` in browser developer tools, then refresh.
+
+## Real payment and backend integration
+
+Replace `simulatePayment` with a server-backed checkout adapter. Create donations only after a server verifies the payment provider webhook. The backend must enforce amount, currency, recipient, price configuration, and idempotency. Never trust client-supplied paid status or localStorage as proof of payment.
+
+Replace the storage implementation of `getDonations`, `createDonation`, and the query methods with Supabase, Firebase, or REST requests. Add stable supporter IDs rather than grouping by display name. Adapt the Context loader to await network results and expose loading/errors as appropriate.
+
+Connect a real subscription through `subscribeToDonations`. Feed verified, deduplicated donation records into the same Context event handler to reuse arrival, counters, activity, and discovery presentation. Handle reconnect/replay and queue bursts before production. The prototype includes no fake WebSocket, server, or cross-device synchronization; storage events refresh other tabs on the same browser origin.
+
+## Accessibility and performance
+
+Native modal dialogs trap focus, support Escape, and restore the triggering control. Inputs are labeled and use native validation, quantity limits, and name/message lengths. Colors have visible heart names. `prefers-reduced-motion` disables decorative animation and changes the arrival to a short fade. Each jar renders at most 96 hearts. Fonts use Google Fonts with local system fallbacks; the app remains usable if fonts cannot load. CSS and the Web Animations API handle the motion without a physics engine or additional animation dependency.
+
+
+## Personal stories and shared celebrations
+
+The latest locally sent heart stays clickable in each jar; recent-activity hearts also open their stories. Story cards include the supporter, recipient, heart quantity, message, timestamp, and donation ID. PNG cards can be downloaded again at any time from My Memories, available in desktop navigation, the footer, and the mobile More menu.
+
+My Memories contains donations made in this browser origin, including anonymous gifts. It is explicitly a device-local book, not account-based ownership or identity verification. It stores no duplicate card images: cards are regenerated from their original donation records. First-heart, both-rooms, and milestone badges are derived from those records without rankings.
+
+New donations record crossed milestone thresholds atomically with the donation. Older demo donations reconstruct milestones chronologically from the fixed seed baseline. Merely opening a book after a milestone does not award it. A saved milestone badge can replay its celebration without changing totals or granting a new badge.
+
+At shared thresholds (including the 3,000-heart room upgrade), the room lighting changes and a five-second scene brings the rabbit and alpaca to the Grand Heart before revealing the new gift. Skip/Escape dismiss the scene; special-heart discovery follows. Reduced motion keeps the companions still and uses a shorter static reveal. Celebration presentation is transient; saved badge evidence survives refresh.

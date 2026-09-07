@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {getPersonalMemories,crossedMilestones} from '../src/services/memoryService.js';
+const seed={id:'demo-seed',quantity:469};
+const gift=(id,quantity,recipient='rose',extra={})=>({id,quantity,recipient,createdAt:`2026-09-07T10:0${id}:00Z`,...extra});
+test('empty personal book never claims mock hearts or badges',()=>{assert.deepEqual(getPersonalMemories([seed]),{history:[],badges:[],hearts:0});});
+test('legacy gifts reconstruct exact milestone crossings including anonymous gifts',()=>{const m=getPersonalMemories([seed,gift('1',16,'praew',{anonymous:true}),gift('2',15)]);assert.equal(m.hearts,31);assert.equal(m.history.length,2);assert.deepEqual(m.badges.map(b=>b.id),['first','together','milestone-500']);assert.equal(m.badges[2].at,500);});
+test('recorded empty milestones do not earn a retroactive badge',()=>{const m=getPersonalMemories([seed,gift('1',31,'rose',{memoryMilestones:[]})]);assert.equal(m.badges.length,1);});
+test('recorded milestones survive serialization and no later gift duplicates them',()=>{const data=[seed,gift('1',31,'rose',{memoryMilestones:[500]}),gift('2',1,'rose',{memoryMilestones:[]})];const m=getPersonalMemories(JSON.parse(JSON.stringify(data)));assert.equal(m.badges.filter(b=>b.id==='milestone-500').length,1);assert.equal(m.badges.find(b=>b.at===500).createdAt,data[1].createdAt);});
+test('room upgrade also triggers celebration and multi-threshold events stay ordered',()=>{assert.deepEqual(crossedMilestones(2999,3000).map(m=>m.at),[3000]);assert.deepEqual(crossedMilestones(499,2000).map(m=>m.at),[500,1000,2000]);assert.deepEqual(crossedMilestones(500,501),[]);});
