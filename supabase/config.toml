@@ -1,0 +1,4 @@
+project_id = "heart-collection"
+[functions.heart-api]
+verify_jwt = false
+# Public donor routes use no user login; admin routes explicitly verify getUser and the private allowlist.

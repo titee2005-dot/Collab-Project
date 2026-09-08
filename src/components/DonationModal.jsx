@@ -1,23 +1,39 @@
-import {useState,useRef} from 'react';
-import {Check,ChevronLeft,Minus,Plus,Moon,Sun} from 'lucide-react';
+import {useEffect,useRef,useState} from 'react';
 import Modal from './Modal';
+import {paymentQR} from '../services/paymentQR';
 import {Heart} from './Artwork';
 import {heartTypes} from '../data/heartTypes';
-import {createDonation} from '../services/donationService';
-import {simulatePayment} from '../services/paymentService';
-const steps=['Recipient','Heart','Your note','Review','Demo payment'];
+import {getPaymentConfig,submitSlip} from '../services/paymentService';
 export default function DonationModal({initialRecipient,onClose}){
- const [step,setStep]=useState(0),[form,setForm]=useState({recipient:initialRecipient||'rose',heartType:'pink',quantity:1,supporterName:'',anonymous:false,message:'',socialUsername:''}),[busy,setBusy]=useState(false),[error,setError]=useState('');const lock=useRef(false);
- const set=(key,value)=>setForm(p=>({...p,[key]:value}));const heart=heartTypes.find(h=>h.id===form.heartType);
- async function pay(){if(lock.current)return;lock.current=true;setBusy(true);setError('');try{await simulatePayment();createDonation(form);onClose();}catch{setError('Something interrupted the spell. Please try again.');lock.current=false;setBusy(false);}}
- return <Modal title={['Who is this heart for?','Choose a little magic.','Make it yours.','A heart, ready to send.','One last little spell.'][step]} onClose={()=>{if(!busy)onClose();}}><div className="steps" aria-label={`Step ${step+1} of 5: ${steps[step]}`}>{steps.map((s,i)=><span key={s} className={i<=step?'done':''}><i>{i<step?<Check size={12}/>:i+1}</i><small>{s}</small></span>)}</div>
- <form onSubmit={e=>{e.preventDefault();setError('');setStep(s=>s+1);}}>
- {step===0&&<><p className="muted">Every heart adds something beautiful to their room.</p><div className="recipient-options">{['rose','praew'].map(id=><button key={id} type="button" aria-pressed={form.recipient===id} className={`recipient-option ${id} ${form.recipient===id?'selected':''}`} onClick={()=>set('recipient',id)}>{id==='rose'?<Moon size={36}/>:<Sun size={36}/>}<b>Send to {id==='rose'?'Rose':'Praew'}</b><small>{id==='rose'?'Moonlight & roses':'Sunshine & wishes'}</small>{form.recipient===id&&<Check size={17}/>}</button>)}</div></>}
- {step===1&&<><div className="heart-options">{heartTypes.map(h=><button type="button" key={h.id} className={form.heartType===h.id?'selected':''} aria-pressed={form.heartType===h.id} onClick={()=>set('heartType',h.id)}><Heart color={h.color}/><b>{h.name}</b><small>{h.meaning}</small><span>{h.price} THB</span></button>)}</div><div className="quantity"><label htmlFor="quantity">How many hearts?</label><div><button type="button" aria-label="Remove one heart" disabled={form.quantity<=1} onClick={()=>set('quantity',form.quantity-1)}><Minus size={16}/></button><input id="quantity" type="number" min="1" max="100" required value={form.quantity} onChange={e=>set('quantity',e.target.value===''?'':Number(e.target.value))}/><button type="button" aria-label="Add one heart" disabled={form.quantity>=100} onClick={()=>set('quantity',Number(form.quantity)+1)}><Plus size={16}/></button></div></div><p className="total-line">Total donation <b>{heart.price*form.quantity} THB</b></p></>}
- {step===2&&<div className="supporter-form"><label>Your Name<input autoComplete="name" maxLength={30} required={!form.anonymous} disabled={form.anonymous} value={form.supporterName} onChange={e=>set('supporterName',e.target.value)} placeholder="What should we call you?" pattern=".*\S.*"/></label><label className="checkbox"><input type="checkbox" checked={form.anonymous} onChange={e=>set('anonymous',e.target.checked)}/>Send anonymously</label><label>Message <span>optional</span><textarea maxLength={120} value={form.message} onChange={e=>set('message',e.target.value)} placeholder="Always cheering for you ♡"/><small>{form.message.length} / 120</small></label><label>Social username <span>optional</span><input maxLength={40} disabled={form.anonymous} value={form.socialUsername} onChange={e=>set('socialUsername',e.target.value)} placeholder="@yourname"/></label></div>}
- {step===3&&<><div className="review-heart"><Heart color={heart.color}/><p>{heart.name} × {form.quantity}</p><small>for {form.recipient==='rose'?'Rose':'Praew'}</small></div><dl className="review"><div><dt>From</dt><dd>{form.anonymous?'Anonymous':form.supporterName}</dd></div><div><dt>Message</dt><dd>{form.message||'A little heart, with love.'}</dd></div><div><dt>Total donation</dt><dd>{heart.price*form.quantity} THB</dd></div></dl></>}
- {step===4&&<div className="payment"><Heart color={heart.color}/><b>Demo payment</b><p>No money will be charged. Your simulated heart will join the collection on this device.</p><strong>{heart.price*form.quantity} THB</strong></div>}
- {error&&<p role="alert" className="error">{error}</p>}
- <div className="flow-actions">{step>0&&<button type="button" className="text-button" disabled={busy} onClick={()=>setStep(s=>s-1)}><ChevronLeft size={16}/>Back</button>}{step<4?<button className="primary" type="submit">Continue <span>→</span></button>:<button className="primary" type="button" disabled={busy} onClick={pay}>{busy?'Sending your heart…':'Simulate Successful Donation'}</button>}</div>
- </form></Modal>
+ const [form,setForm]=useState({recipient:initialRecipient||'rose',heartType:'pink',quantity:1,supporterName:'',anonymous:false,message:'',socialUsername:''}),[config,setConfig]=useState(null),[slip,setSlip]=useState(null),[busy,setBusy]=useState(false),[error,setError]=useState(''),[result,setResult]=useState(null),[step,setStep]=useState(0);
+ const id=useRef(crypto.randomUUID()),lock=useRef(false);
+ useEffect(()=>{let active=true;getPaymentConfig().then(c=>{if(active)setConfig(c);}).catch(e=>{if(active)setError(e.message);});return()=>{active=false;};},[]);
+ const set=(key,value)=>{id.current=crypto.randomUUID();setForm(f=>({...f,[key]:value}));};
+ const heart=heartTypes.find(h=>h.id===form.heartType);
+ async function submit(){if(lock.current||!slip||!config?.enabled)return;lock.current=true;setBusy(true);setError('');try{setResult(await submitSlip(form,id.current,slip));}catch(e){setError(e.message);}finally{lock.current=false;setBusy(false);}}
+ if(result)return <Modal title="ผลการส่งสลิป" onClose={onClose}><div className="payment"><Heart color={heart.color}/><b>{result.status==='approved'?'ยืนยันแล้ว ขอบคุณสำหรับโดเนท':result.status==='rejected'?'สลิปไม่ผ่านการตรวจสอบ':'รอแอดมินตรวจรายการ'}</b><p>{result.status==='approved'?'หัวใจจะปรากฏเมื่อข้อมูลอัปเดต':'ยังไม่เพิ่มหัวใจ กรุณาเก็บรหัสไว้ติดต่อแอดมิน ไม่ต้องโอนซ้ำ'}</p><small>ID: {result.id}</small></div><button className="primary full" onClick={onClose}>กลับไปที่ห้อง</button></Modal>;
+ if(!config?.enabled)return <Modal title="ยังไม่เปิดรับเงินจริง" onClose={onClose}><p>{error||config?.message||'กำลังตรวจความพร้อมของระบบ…'}</p><p>ต้องตั้งค่าบัญชีผู้รับทั้งโรสและแพรว และเปิดใช้งานจากเซิร์ฟเวอร์ก่อน</p></Modal>;
+ const account=config.accounts[form.recipient],qr=paymentQR(form.recipient,account);
+ return <Modal title={step?'โอนเงินและส่งสลิป':'ส่งหัวใจให้คนที่คุณรัก'} onClose={()=>{if(!busy)onClose();}}>
+ <form className="supporter-form" onSubmit={e=>{e.preventDefault();if(step)submit();else setStep(1);}}>
+ {!step?<>
+ <div className="recipient-options">{['rose','praew'].map(r=><button key={r} type="button" aria-pressed={form.recipient===r} className={'recipient-option '+r+(form.recipient===r?' selected':'')} onClick={()=>set('recipient',r)}><b>{r==='rose'?'Rose · โรส':'Praew · แพรว'}</b><small>บัญชีรับเงินแยกเฉพาะฝั่งนี้</small></button>)}</div>
+ <div className="heart-options">{heartTypes.map(h=><button key={h.id} type="button" aria-pressed={form.heartType===h.id} className={form.heartType===h.id?'selected':''} onClick={()=>set('heartType',h.id)}><Heart color={h.color}/><b>{h.name}</b><small>{h.price} THB</small></button>)}</div>
+ <label>จำนวนหัวใจ<input required type="number" min="1" max="100" step="1" value={form.quantity} onChange={e=>set('quantity',e.target.value===''?'':Number(e.target.value))}/></label>
+ <label>ชื่อผู้โดเนท<input required={!form.anonymous} disabled={form.anonymous} maxLength={30} pattern=".*\S.*" value={form.supporterName} onChange={e=>set('supporterName',e.target.value)}/></label>
+ <label className="checkbox"><input type="checkbox" checked={form.anonymous} onChange={e=>set('anonymous',e.target.checked)}/>ไม่ระบุชื่อ</label>
+ <label>ข้อความ (แสดงสาธารณะ)<textarea maxLength={120} value={form.message} onChange={e=>set('message',e.target.value)}/></label>
+ <label>Social username (ไม่บังคับ)<input disabled={form.anonymous} maxLength={40} value={form.socialUsername} onChange={e=>set('socialUsername',e.target.value)}/></label>
+ <p className="total-line">ยอดโดเนท <b>{heart.price*form.quantity} THB</b></p><button className="primary">ตรวจบัญชีและโอนเงิน →</button>
+ </>:<>
+ <div className="payment"><Heart color={heart.color}/><b>ผู้รับ: {form.recipient==='rose'?'โรส':'แพรว'}</b><p>{account.bankName}<br/>{account.accountName}<br/><strong>{account.accountNumber}</strong></p><strong>{heart.price*form.quantity} THB</strong><p>{heart.name} × {form.quantity}</p></div>
+ {qr&&<section className="payment-qr"><h3>สแกน QR เพื่อโดเนทให้{form.recipient==='rose'?'โรส':'แพรว'}</h3><p>โอนยอด {heart.price*form.quantity} บาท และตรวจชื่อผู้รับในแอปธนาคารให้ตรงกับบัญชีด้านบนก่อนยืนยัน</p><img src={qr} alt={'QR รับโดเนทของ'+(form.recipient==='rose'?'โรส':'แพรว')} /><a href={qr} download>บันทึกภาพ QR</a><p>ชำระแล้วแนบสลิปด้านล่างเพื่อให้ตรวจสอบยอด</p></section>}
+ <label>อัปโหลดสลิป PNG/JPEG ไม่เกิน 4 MB<input required type="file" accept="image/png,image/jpeg" disabled={busy} onChange={e=>{const file=e.target.files[0];id.current=crypto.randomUUID();if(file&&file.size>4*1024*1024){setError('ไฟล์ต้องไม่เกิน 4 MB');setSlip(null);return;}setError('');setSlip(file);}}/></label>
+ <p>ตรวจอัตโนมัติหรือรอแอดมินอนุมัติก่อนเพิ่มหัวใจ สลิปอาจถูกส่งให้ EasySlip ตรวจสอบ และแอดมินเข้าถึงเพื่อยืนยันยอด</p>
+ <p className="fine-print">ชื่อ ข้อความ และ Social username จะแสดงสาธารณะ เลือกไม่ระบุชื่อเพื่อซ่อนชื่อและ Social username</p>
+ <small>รหัสรายการ: {id.current}</small>
+ <div className="flow-actions"><button type="button" className="text-button" disabled={busy} onClick={()=>setStep(0)}>กลับ</button><button className="primary" disabled={busy||!slip}>{busy?'กำลังส่งและตรวจสลิป…':'ส่งสลิปเพื่อตรวจสอบ'}</button></div>
+ </>}
+ {error&&<p className="error" role="alert">{error}</p>}
+ </form></Modal>;
 }

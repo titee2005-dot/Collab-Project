@@ -1,6 +1,6 @@
-export async function simulatePayment({fail = false} = {}) {
-  await new Promise(resolve=>setTimeout(resolve,650));
-  if (fail) throw new Error('Something interrupted the spell. Please try again.');
-  return {id:crypto.randomUUID(),status:'simulated',paidAt:new Date().toISOString()};
+import {api,rememberOrder} from './api';
+export const getPaymentConfig=()=>api('/config');
+export async function submitSlip(form,id,slip){
+ const body=new FormData();body.set('id',id);body.set('form',JSON.stringify(form));body.set('slip',slip);rememberOrder(id);
+ return api('/orders',{method:'POST',body});
 }
-

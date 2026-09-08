@@ -3,3 +3,14 @@ dist
 .vercel
 .env
 .env.local
+.env.*
+!.env.example
+data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+supabase/.temp/
+*.local.sql
+
+.vercel
+.env*

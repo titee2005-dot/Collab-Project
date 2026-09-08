@@ -10,6 +10,6 @@ const descriptions=[
  'An open spellbook rests on the shelf, full of the stories you collected together.',
 ];
 export const collectibleItems={
- rose:['Rose Ribbon','Rose Potion','Moon Wand','Rabbit Moon Charm','Moon Mirror','Rose Crown','Rose Spellbook'].map((name,i)=>({id:`rose-${i}`,name,at:thresholds[i],kind:kinds[i],description:descriptions[i]})),
+ rose:['Rose Ribbon','Rabbit Moon Charm','Rose Potion','Rose Spellbook','Moon Wand','Moon Mirror','Rose Crown'].map((name,i)=>({id:`rose-${i}`,name,at:thresholds[i],kind:kinds[i],description:descriptions[i]})),
  praew:['Star Ribbon','Golden Potion','Star Wand','Alpaca Star Charm','Sun Crystal','Star Crown','Butterfly Spellbook'].map((name,i)=>({id:`praew-${i}`,name,at:thresholds[i],kind:i===4?'crystal':kinds[i],description:i===4?'A sun crystal catches warm light beside the magical window.':descriptions[i]})),
 };

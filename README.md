@@ -1,95 +1,108 @@
-# Heart Collection
+# Heart Collection — Supabase
 
-An original, responsive React + Vite + JavaScript prototype for Rose and Praew. Open the app directly into two magical collections and their shared Grand Heart. This is a local demo: no money is charged, no real payment credentials are requested, and no supporter data is sent to a server.
+หน้าเว็บ React/Vite ใช้ Supabase เป็นหลังบ้าน: PostgreSQL เก็บประวัติ, Auth ล็อกอินแอดมิน, Storage เก็บสลิปส่วนตัว และ Edge Function ตรวจ/อนุมัติรายการ ไม่ต้องเปิด Node server ของเว็บค้างไว้เมื่อใช้ Supabase
 
-## Run locally
+ระบบเริ่มต้น **ปิดรับเงินจริง** และ **ปิดตรวจอัตโนมัติ** เสมอ
 
-Use Node.js 22.12+ (tested with Node 24).
+## เปิดเว็บในเครื่อง
 
-```sh
-cd heart-collection
-npm install
-npm run dev
-```
+    npm install
+    npm run dev
 
-Open the localhost address printed by Vite. The workspace preview currently uses port 5179.
+เปิด http://localhost:5173 หน้าเว็บอ่านค่าจาก .env.local (ไม่ติด Git):
 
-```sh
-npm test
-npm run build
-npm run preview
-```
+    VITE_BACKEND=supabase
+    VITE_SUPABASE_URL=https://ctimhxkwpzsebodbtptx.supabase.co
+    VITE_SUPABASE_PUBLISHABLE_KEY=<Publishable key ของโปรเจกต์>
 
-`npm test` uses Node's built-in test runner. It checks consistent seed totals, prices, amount-mode calculations, validation, anonymous search privacy, persistence, event emission, exact milestone crossings, and simulated payment failure.
+เฉพาะ Publishable key/anon public key ใช้ใน VITE_ ได้ ห้ามใส่ service_role, secret key, EasySlip key หรือรหัสผ่านในตัวแปร VITE_
 
-## Deploy to Vercel
+## ติดตั้งหลังบ้าน
 
-Import the containing repository, set **Root Directory** to `heart-collection`, select the Vite framework, and use `npm run build` with output directory `dist`. This folder contains its own package manifest, lockfile, and Vercel configuration. No environment variables are needed for the prototype. Deployment has not been performed.
+โปรเจกต์นี้เตรียม migration และ Edge Function ไว้แล้ว การเชื่อม URL/key อย่างเดียวไม่ได้สร้างตารางหรือ API ให้
 
-## Experience
+    npx supabase login
+    npx supabase link --project-ref ctimhxkwpzsebodbtptx
+    npx supabase db push --dry-run
+    npx supabase db push
+    npx supabase secrets set APP_ORIGIN=http://localhost:5173 RECEIVING_ENABLED=false
+    npx supabase functions deploy heart-api --use-api
 
-- Rose starts with 235 hearts, Praew with 234. All counts come from 469 individual seed donation records.
-- Five-step donation flow: recipient, heart and quantity, supporter note, review, demo payment.
-- A crystal heart flies to the selected jar, the jar glows, and the counts update on arrival. Quantities from 1 to 100 are supported.
-- The four standard hearts have data-driven prices. A 31-heart donation from the fresh demo triggers the first shared discovery at 500.
-- Special hearts are **community discoveries** in the collection book, not additional paid donation options. They remain silhouettes until unlocked.
-- Room collectibles unlock independently for each artist and appear as SVG props. The rabbit for Rose and alpaca for Praew are present from the first heart and react to greetings and incoming donations. At 100 hearts they wear a bow, at 500 they learn a shuffle, at 750 they receive a companion charm, and at 1,500 a crown. The shared room upgrade activates at 3,000 combined hearts.
-- Search by supporter name, social username, or donation ID. Results group matching display names, which are not authenticated identities. Anonymous names and handles are not searchable.
-- Click the next magical item beneath a jar to preview its placement in the real room. The preview strip lets you inspect every room collectible, its description, and the remaining hearts. Previewing never adds donations or unlocks items. Companion charms preview directly on the animal.
-- The collection book includes Heart Collection, Rose Items, Praew Items, and Shared Magic tabs (the Magic Cabinet).
-- Mobile shows the Grand Heart first, collection-room tabs, a fixed bottom navigation, and bottom-sheet dialogs.
-- Download PNG share cards or use native sharing when supported. The app never posts automatically.
+ตรวจให้แน่ใจว่าเป็นโปรเจกต์ที่ต้องการก่อนรัน db push ถ้าโปรเจกต์มี migration เดิม ต้องตรวจประวัติก่อน ไม่ใช้ db reset กับข้อมูลจริง
 
-## Configuration
+SQL อยู่ที่ supabase/migrations/202609080001_heart_backend.sql; API อยู่ที่ supabase/functions/heart-api/
+ตัวแปร SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY ของ Edge Function ถูกจัดเตรียมโดย Supabase ไม่ต้องส่งมาที่หน้าเว็บ
 
-| File | Change here |
-| --- | --- |
-| `src/data/heartTypes.js` | Standard heart names, meanings, colors, and THB prices |
-| `src/data/specialHearts.js` | Special discoveries, colors, meanings, and unlock thresholds |
-| `src/data/milestones.js` | Shared thresholds and milestone names |
-| `src/data/collectibleItems.js` | Per-artist props and thresholds |
-| `src/data/characters.js` | Artist names, room subtitles, and licensed artwork paths |
-| `src/data/mockDonations.js` | Deterministic demo records and supporter names |
-| `src/data/audioConfig.js` | Audio files and volume |
-| `src/styles/index.css` | Typography, rose/moon and peach/sun themes, layout, motion |
+## เข้าใช้งานหลังบ้าน
 
-To change a price, edit its `price` property; components never contain donation prices. To add a standard heart, add a definition with a unique `id`, and update the seed count arrays in `mockDonations.js` so they match the definition order. Stats and selectors derive their entries from the definitions. Add special discoveries separately in `specialHearts.js` and align the desired shared milestone in `milestones.js`.
+หน้าเว็บสาธารณะไม่มีปุ่มแอดมิน ให้พิมพ์ URL โดยตรง:
+- /adminpage-rose: อนุมัติและบันทึกเฉพาะโรส
+- /adminpage-praew: อนุมัติและบันทึกเฉพาะแพรว
+- /adminpage-all: อนุมัติและบันทึกทั้งสองฝั่ง
+- /adminpage-settings: ตั้งค่าอัตโนมัติและรหัสผ่านผู้อนุมัติ เฉพาะเจ้าของ heartcollection@gmail.com
 
-Add room objects to `collectibleItems.js`. Reuse a supported `kind` (`ribbon`, `potion`, `wand`, `rabbit`, `cat`, `mirror`, `crystal`, `crown`, `book`), or extend `Prop` in `components/Artwork.jsx` and position the new item with CSS. To replace placeholder scenery with licensed art, place files under `public/artwork` and set each character's `artwork` URL. Original SVG jars, gems, and room decorations remain available as separate editable components.
+เจ้าของล็อกอินด้วยอีเมลและรหัสผ่าน Supabase Auth ใน /adminpage-settings แล้วเข้าหน้าอนุมัติทั้งสามได้โดยไม่ต้องใช้รหัสชุดผู้อนุมัติ จากนั้นตั้งรหัสผ่านแยกสามชุด (12–128 ตัวอักษร) ในหน้าตั้งค่า หน้าอนุมัติใช้แค่รหัสผ่าน ไม่ต้องกรอกอีเมล รหัสยังไม่ถูกตั้งจะเข้าไม่ได้
 
-`resolveHearts` implements fixed-price Mode A and an isolated exact-change Mode B calculator. The current UI and donation service use Mode A. Before enabling Mode B, save every returned allocation as a line item in one verified transaction; do not silently discard leftover THB or use only the first allocation.
+จำเบราว์เซอร์ 7 วันด้วยโทเคนที่หมดอายุฝั่งฐานข้อมูล เก็บเฉพาะแฮชของโทเคนและรหัสผ่านบนเซิร์ฟเวอร์ เปลี่ยนรหัสฝั่งใดจะยกเลิกเซสชันเดิมฝั่งนั้นทันที ออกจากระบบยกเลิกเซสชันปัจจุบัน ผู้อนุมัติทุกชุดไม่มีสิทธิ์เปลี่ยนค่าระบบ แม้ทราบ URL หรือเรียก API โดยตรง
 
-## Audio
+เจ้าของต้องมีบัญชีใน Authentication > Users และสิทธิ์ owner ใน heart_private.admins (มีได้หนึ่งบัญชี) หากติดตั้งโปรเจกต์ใหม่ ให้รัน supabase/setup-admin.sql หลังสร้างบัญชีเจ้าของแล้ว บัญชี Dashboard ไม่ใช่บัญชี Auth ของเว็บ
 
-The included WAV files are original procedural celesta tones, generated by `node scripts/generate-audio.mjs`. No third-party recordings are used. Music starts only after a click, loops at 27% volume, and fades in and out. The saved preference never overrides browser autoplay restrictions. Optional arrival, drop, unlock, and sparkle WAV files are included as integration-ready assets; sound effects are not automatically played.
+## ตั้งบัญชีผู้รับและเปิดรับเงินจริงภายหลัง
 
-To use a supplied MP3, put it at `public/audio/magical-theme.mp3` and change `audioConfig.music` to `/audio/magical-theme.mp3`. The same approach supports `heart-arrive.mp3`, `heart-drop.mp3`, `unlock.mp3`, and `sparkle.mp3`. Missing or invalid music is handled by disabling the music control. No placeholder file pretends to contain valid audio.
+1. เปิด supabase/setup-accounts.sql ใส่บัญชีโรสและแพรวคนละบัญชี แล้วรันใน SQL Editor สคริปต์นี้ยังคงปิดรับเงิน
+2. ตรวจว่าชื่อผู้รับ ธนาคาร เลขบัญชี และบัญชีแอดมินครบ
+3. เมื่อพร้อมเปิดจริงเท่านั้น ตั้ง receivingEnabled ในฐานข้อมูลเป็น true และตั้ง Edge Function secret RECEIVING_ENABLED=true
 
-## Data, persistence, and errors
+ต้องเปิดทั้งสองจุดจึงรับเงินจริงได้ การอัปโหลดและการอนุมัติจะถูกปฏิเสธถ้าจุดใดจุดหนึ่งยังปิดอยู่ ฝั่งสาธารณะไม่เห็นเลขบัญชีเมื่อระบบปิด
 
-`donationService.js` owns record validation, storage, search, statistics, and the subscription boundary. `paymentService.js` owns the delayed simulation; call `simulatePayment({fail:true})` to test the failure path. `progressionService.js` derives unlocked state from totals, so discoveries and room items survive refresh without a second, inconsistent stored counter.
+เมื่อย้ายหน้าเว็บขึ้นโฮสต์จริง ให้ตั้ง APP_ORIGIN ของ Edge Function เป็น URL HTTPS ของเว็บ และตั้งตัวแปร VITE_ ในโฮสต์หน้าเว็บก่อน build ใหม่ ไม่ต้องติดตั้ง server/index.js บนโฮสต์หน้าเว็บ
 
-Only new demo donations are saved at `heart-collection.donations.v1`. The immutable seed data is merged on read. Music preference and dismissed help state have separate namespaced keys. If storage is corrupt or inaccessible, the archive error screen offers Retry; no saved data is silently erased. A failed storage write displays a retryable donation error. To reset your own test demo, remove only `heart-collection.donations.v1` in browser developer tools, then refresh.
+## ตรวจเองหรืออัตโนมัติ
 
-## Real payment and backend integration
+- ตรวจเอง: ไม่ต้องมี EasySlip key แอดมินตรวจยอดเข้าบัญชีจริง แล้วกรอกยอด บัญชีผู้รับ เวลาโอน เลขอ้างอิงก่อนอนุมัติ
+- อัตโนมัติ: เพิ่ม EASYSLIP_API_KEY ใน Edge Function Secrets แล้วเปิดสวิตช์ใน Admin พร้อมเพดานเรียกสะสมและวันหมดอายุ เลือกฝั่งโรส/แพรวที่ต้องการ
+- ทุกครั้งที่จองเรียก API นับรวมทั้งสองฝั่ง และไม่คืนโควต้าเมื่อ timeout หรือรีสตาร์ต ไม่มีโหมดเรียกไม่จำกัด
+- เมื่อถึงเพดาน หมดอายุ ไม่มีคีย์ หรือบริการขัดข้อง รายการใหม่รอแอดมิน ไม่เพิ่มหัวใจเอง ต้องให้แอดมินตรวจสิทธิ์และเปิดใหม่
+- เพดานเป็นค่าที่เราตั้ง ไม่ใช่โควต้าที่ดึงจากผู้ให้บริการ หากใช้คีย์ที่อื่นต้องหักยอดนั้นก่อน
+- สลิปที่ยอด/ธนาคาร/บัญชีไม่ตรงถูกปฏิเสธ เลขบัญชีที่ถูกปกปิดรอแอดมิน
+- การเปลี่ยนโหมดไม่ส่งคิวเดิมไปตรวจย้อนหลัง คำขอที่ส่ง API ไปแล้วอาจทำงานจนจบ
 
-Replace `simulatePayment` with a server-backed checkout adapter. Create donations only after a server verifies the payment provider webhook. The backend must enforce amount, currency, recipient, price configuration, and idempotency. Never trust client-supplied paid status or localStorage as proof of payment.
+## ข้อมูลและความปลอดภัย
 
-Replace the storage implementation of `getDonations`, `createDonation`, and the query methods with Supabase, Firebase, or REST requests. Add stable supporter IDs rather than grouping by display name. Adapt the Context loader to await network results and expose loading/errors as appropriate.
+- ตารางอยู่ใน schema heart_private เปิด RLS และไม่ให้ anon/authenticated อ่านหรือเขียนโดยตรง
+- RPC heart_api เรียกได้เฉพาะ service_role ใน Edge Function
+- Storage bucket donation-slips เป็น private และมี restrictive policy ป้องกันการเข้าถึงจาก browser แม้โปรเจกต์มี policy อื่นที่เปิดกว้าง
+- แอดมินเปิดภาพผ่าน signed URL อายุ 60 วินาที เลขบัญชี สลิป เลขธุรกรรม และบันทึกแอดมินไม่ถูกส่งออกในประวัติสาธารณะ
+- เก็บชื่อ/ข้อความสาธารณะเฉพาะรายการอนุมัติแล้ว ผู้ส่งไม่ระบุชื่อจะถูกลบชื่อและ social handle ฝั่งเซิร์ฟเวอร์ ข้อความยังเป็นสาธารณะ
+- การสร้างรายการ การกัน hash/เลขอ้างอิงซ้ำ การจองโควต้า และการอนุมัติใช้ธุรกรรม PostgreSQL กับ row lock
+- อัปโหลดไฟล์และฐานข้อมูลเป็นคนละบริการ: ถ้าอัปโหลดล้มเหลว รายการคงอยู่แต่อนุมัติไม่ได้จนภาพพร้อม ส่งซ้ำด้วย ID และข้อมูลเดิมได้
+- หากระบบหยุดหลังจองโควต้า รายการจะรอแอดมิน ไม่เรียก API ซ้ำแบบไม่ทราบยอดใช้
+- จำกัดอัปโหลดจากหน้าเว็บรวม 20 ครั้ง/ชั่วโมงเพื่อควบคุมการใช้พื้นที่/โควต้า โดยไม่เชื่อ forwarding headers ที่ผู้ส่งอาจปลอมได้ สามารถออกแบบ rate limit รายผู้ใช้/Turnstile เพิ่มก่อนขยายการใช้งาน
+- My Memories เป็น bookmark ของรายการบนเบราว์เซอร์ ไม่ใช่บัญชีผู้โดเนท
+- ข้อมูล SQLite เดิมไม่ได้ถูกคัดลอกขึ้น Supabase โดยอัตโนมัติ ต้องแยกตรวจข้อมูลจริงก่อนนำเข้า ห้ามนำ demo มารวมยอดจริง
+- ควรกำหนดการลบสลิปและสำรองข้อมูลตามการใช้งานจริง ฐานข้อมูลสำรองไม่ได้รวมไฟล์ Storage โดยอัตโนมัติ
 
-Connect a real subscription through `subscribeToDonations`. Feed verified, deduplicated donation records into the same Context event handler to reuse arrival, counters, activity, and discovery presentation. Handle reconnect/replay and queue bursts before production. The prototype includes no fake WebSocket, server, or cross-device synchronization; storage events refresh other tabs on the same browser origin.
+## ทดสอบ
 
-## Accessibility and performance
+    npm test
+    npm run build
 
-Native modal dialogs trap focus, support Escape, and restore the triggering control. Inputs are labeled and use native validation, quantity limits, and name/message lengths. Colors have visible heart names. `prefers-reduced-motion` disables decorative animation and changes the arrival to a short fade. Each jar renders at most 96 hearts. Fonts use Google Fonts with local system fallbacks; the app remains usable if fonts cannot load. CSS and the Web Animations API handle the motion without a physics engine or additional animation dependency.
+ทดสอบ migration บน PostgreSQL ผ่าน PGlite พร้อมทดสอบ Edge Function โดยจำลอง Auth/Storage/EasySlip การทดสอบนี้ไม่รับเงินจริง ไม่ส่งสลิปไปผู้ให้บริการ และไม่แก้ข้อมูล Supabase จริง
+ยังต้องตรวจ hosted Auth/Storage และบัญชีผู้รับจริงก่อนเปิดรับโดเนท
 
+## Backend เดิมสำหรับพัฒนา
 
-## Personal stories and shared celebrations
+เก็บ Node/SQLite เดิมไว้สำหรับทดสอบย้อนหลัง ไม่ใช่ backend หลักของหน้าเว็บแล้ว ดู server/README.local.md
+หากต้องการใช้เดิม ให้ตั้ง VITE_BACKEND=local, ใช้ server/local.env.example เป็น .env แล้วรัน npm run server คู่กับ npm run dev
 
-The latest locally sent heart stays clickable in each jar; recent-activity hearts also open their stories. Story cards include the supporter, recipient, heart quantity, message, timestamp, and donation ID. PNG cards can be downloaded again at any time from My Memories, available in desktop navigation, the footer, and the mobile More menu.
+## เกมฟักไข่ร่วมกัน
 
-My Memories contains donations made in this browser origin, including anonymous gifts. It is explicitly a device-local book, not account-based ownership or identity verification. It stores no duplicate card images: cards are regenerated from their original donation records. First-heart, both-rooms, and milestone badges are derived from those records without rankings.
+ไข่กระต่ายและอัลปาก้าใช้ยอดรวมของผู้เล่นทุกคน แยกตัวละ 100,000 คลิก ฟักเมื่อฐานข้อมูลยืนยันว่าครบเป้า รอยร้าว 25%, 50%, 75% คลิกในเครื่องตอบสนองทันที ส่ง batch ทุก 2 วินาที สูงสุด 100 คลิกต่อชุด ไม่ส่งเมื่อไม่มีคลิก และคิวรอสูงสุด 1,000 คลิกเพื่อไม่ให้สะสมขณะออฟไลน์ไม่จำกัด
 
-New donations record crossed milestone thresholds atomically with the donation. Older demo donations reconstruct milestones chronologically from the fixed seed baseline. Merely opening a book after a milestone does not award it. A saved milestone badge can replay its celebration without changing totals or granting a new badge.
+RPC heart_hatch รวมยอดแบบ transaction และป้องกันส่งชุดเดิมซ้ำ ใช้ Realtime Postgres Changes ของ public.heart_hatching ส่งเฉพาะยอดรวม ไม่เปิดข้อมูลผู้เล่น จำกัด event กลางไม่ถี่กว่าทุก 2 วินาที อ่านยอดล่าสุดหลัง event สุดท้ายเพื่อเก็บยอดตกค้าง และตรวจซ้ำทุก 30 วินาทีเมื่อเปิดหน้าอยู่ ยอดรวมและคิวในเครื่องเปลี่ยนพร้อมกันเมื่อได้รับคำยืนยัน ไม่ใช้แอนิเมชันไล่เลขซึ่งอาจแสดงค่าย้อนระหว่างซิงก์
 
-At shared thresholds (including the 3,000-heart room upgrade), the room lighting changes and a five-second scene brings the rabbit and alpaca to the Grand Heart before revealing the new gift. Skip/Escape dismiss the scene; special-heart discovery follows. Reduced motion keeps the companions still and uses a shorter static reveal. Celebration presentation is transient; saved badge evidence survives refresh.
+คิวที่ยังไม่ส่งเก็บใน sessionStorage เพื่อส่งต่อเมื่อรีเฟรชแท็บเดิม ปิดแท็บอาจเสียคลิกที่ยังไม่ยืนยัน ยอดกลางที่ยืนยันแล้วคงอยู่ทุกเครื่อง ยอดเกมไม่เพิ่มยอดโดเนท เกมไม่ต้องล็อกอิน ตัวระบุเครื่องเป็นข้อมูลฝั่ง client จึงไม่ใช่ระบบป้องกันบอตหรือการแข่งขันที่มีรางวัล
+
+ไม่มี Edge Function สำหรับคลิกเกม แต่ยังใช้โควต้า Database/Realtime และ bandwidth ตามจำนวนผู้เล่นและระยะเวลาเปิดเว็บ การส่งเป็นชุดช่วยลดการใช้ ไม่รับประกันว่ารองรับผู้เล่นจำนวนใดบนแผนฟรีได้ไม่จำกัด
+
+บนมือถือมินิเกมอยู่ใต้ห้อง ใช้แท็บเลือกไข่โรสหรือแพรว สัตว์แต่ละตัวแสดงเมื่อยอดกลางของตัวนั้นครบ 100,000 เท่านั้น หน้า localhost ใช้ Vite proxy /supabase-api สำหรับ API โดเนท

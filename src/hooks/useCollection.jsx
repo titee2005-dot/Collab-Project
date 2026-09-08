@@ -1,23 +1,20 @@
-import {crossedMilestones} from '../services/memoryService';
 import {createContext,useContext,useEffect,useRef,useState} from 'react';
-import {getDonations,subscribeToDonations,getCollectionStats} from '../services/donationService';
+import {refreshDonations,getCollectionStats} from '../services/donationService';
+import {crossedMilestones} from '../services/memoryService';
 import {getNewDiscoveries} from '../services/progressionService';
-import {mockDonations} from '../data/mockDonations';
 const Context=createContext(null);
 export function CollectionProvider({children}){
- const [donations,setDonations]=useState(()=>{try{return getDonations();}catch{return mockDonations;}}),[error,setError]=useState(''),[arrival,setArrival]=useState(null),[discoveries,setDiscoveries]=useState([]),[notice,setNotice]=useState(null),[celebration,setCelebration]=useState(null);
- const current=useRef(donations),timers=useRef([]);
- const reload=()=>{try{const data=getDonations();current.current=data;setDonations(data);setError('');}catch{setError('The Heart Archive is resting for a moment.');}};
- useEffect(()=>{reload();const unsubscribe=subscribeToDonations(d=>{
-  const before=getCollectionStats(current.current).total;
-  current.current=[...current.current,d];
-  setArrival(d);
-  timers.current.push(setTimeout(()=>{setDonations([...current.current]);setNotice(d);setArrival(null);const crossed=crossedMilestones(before,before+d.quantity);if(crossed.length)setCelebration({id:d.id,milestones:crossed});const found=getNewDiscoveries(before,before+d.quantity);if(found.length)setDiscoveries(q=>[...q,...found]);},matchMedia('(prefers-reduced-motion: reduce)').matches?150:1450));
-  timers.current.push(setTimeout(()=>setNotice(null),9000));
- });const sync=()=>reload();window.addEventListener('storage',sync);return()=>{unsubscribe();timers.current.forEach(clearTimeout);window.removeEventListener('storage',sync);};},[]);
- return <Context.Provider value={{donations,stats:getCollectionStats(donations),error,reload,arrival,notice,discoveries,celebration,replayCelebration:at=>setCelebration({id:`replay-${at}-${Date.now()}`,milestones:crossedMilestones(at-1,at)}),dismissCelebration:()=>setCelebration(null),dismissDiscovery:()=>setDiscoveries(q=>q.slice(1))}}>{children}</Context.Provider>
+ const [donations,setDonations]=useState([]),[error,setError]=useState(''),[arrival,setArrival]=useState(null),[notice,setNotice]=useState(null),[discoveries,setDiscoveries]=useState([]),[celebration,setCelebration]=useState(null);
+ const reloadRef=useRef(()=>{});
+ useEffect(()=>{
+  let disposed=false,busy=false,current=null,timer;
+  async function reload(){if(busy)return;busy=true;try{const data=await refreshDonations();if(disposed)return;
+   if(current){const known=new Set(current.map(d=>d.id)),newItems=data.filter(d=>!known.has(d.id));if(newItems.length){const before=getCollectionStats(current).total,after=getCollectionStats(data).total,last=newItems.at(-1);setArrival(last);setNotice(last);const crossed=crossedMilestones(before,after);if(crossed.length)setCelebration({id:last.id,milestones:crossed});setDiscoveries(q=>[...q,...getNewDiscoveries(before,after)]);clearTimeout(timer);timer=setTimeout(()=>{setArrival(null);setNotice(null);},5000);}}
+   current=data;setDonations(data);setError('');
+  }catch(e){if(!disposed)setError(e.message);}finally{busy=false;}}
+  reloadRef.current=reload;reload();const interval=setInterval(reload,5000);window.addEventListener('focus',reload);
+  return()=>{disposed=true;clearInterval(interval);clearTimeout(timer);window.removeEventListener('focus',reload);};
+ },[]);
+ return <Context.Provider value={{donations,stats:getCollectionStats(donations),error,reload:()=>reloadRef.current(),arrival,notice,discoveries,celebration,replayCelebration:at=>setCelebration({id:'replay-'+at+'-'+Date.now(),milestones:crossedMilestones(at-1,at)}),dismissCelebration:()=>setCelebration(null),dismissDiscovery:()=>setDiscoveries(q=>q.slice(1))}}>{children}</Context.Provider>;
 }
 export const useCollection=()=>useContext(Context);
-
-
-
