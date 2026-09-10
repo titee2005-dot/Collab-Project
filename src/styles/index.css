@@ -107,11 +107,17 @@
  .grand-games .mini-games-launcher{margin:18px auto 24px;max-width:350px}
 }
 
-/* Mobile actions: collect a heart, then open mini games. */
+/* /* Mobile launcher sits below the room statistics and caption. */
+#mobile-mini-games:empty{display:none}
 @media(max-width:640px){
- .grand>.collect-button{display:flex;grid-column:1/-1;grid-row:2;width:100%;max-width:350px;margin:18px auto 12px;min-height:48px}
- .grand>.demo-note{grid-row:3}
- .grand>.grand-games{grid-row:4}
- .grand>.next-discovery{grid-row:5;margin-top:0;margin-bottom:20px}
- .grand-games .mini-games-launcher{margin:16px auto 20px;max-width:350px}
+ .grand-games{display:none}
+ #mobile-mini-games .mini-games-launcher{margin:0 auto 28px;max-width:350px}
+ #mobile-mini-games .mini-games-open{width:100%;box-shadow:none;border-radius:14px}
+}
+.room-heart-arrow>span{display:none}
+.room-heart-arrow>svg{width:19px;height:19px}
+@media(max-width:640px){
+.room-stats .count .room-heart-arrow{display:inline-flex;align-items:center;justify-content:center;gap:4px;width:auto;height:auto;min-height:36px;padding:6px 9px;border-radius:20px;flex-shrink:0;white-space:nowrap;font-size:9px;font-weight:500;line-height:1.3}
+.room-heart-arrow>span{display:inline}
+.room-heart-arrow>svg{width:14px;height:14px}
 }
