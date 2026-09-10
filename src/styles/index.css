@@ -69,3 +69,40 @@
 .toast b{white-space:normal}.arrival-heart{width:auto}.room-environment svg{width:100%}.memory-tile span{overflow-wrap:anywhere;max-width:100%}
 
 .environment-garden{bottom:9%;height:110px;letter-spacing:0}.environment-garden svg{height:110px}.room:has(.environment-window) .arch{background:linear-gradient(155deg,#ddd0ec66,#f3d8e04a 65%,transparent)}.room.praew:has(.environment-window) .arch{background:linear-gradient(155deg,#efddb477,#f5d4be44 65%,transparent)}
+
+/* Compact homepage spacing. */
+.activity-list:empty{display:none}
+.app main>.world{margin-top:20px}
+.app footer{justify-content:center;flex-wrap:wrap}
+.app footer button{margin-left:0}
+@media(max-width:640px){.app main>.world{margin-top:14px}}
+
+/* Keep the game entry within the central collection column. */
+.grand-games{grid-column:1/-1;width:100%;min-width:0;text-align:left}
+.grand-games .mini-games-launcher{margin:24px auto 0;max-width:252px}
+.grand-games .mini-games-open{width:100%;padding:13px 16px;box-shadow:none;border-radius:14px}
+.grand-games .mini-games-open>svg:last-child{margin-left:auto}
+@media(min-width:641px){
+ .app .world{max-width:1220px;margin-left:auto;margin-right:auto;column-gap:16px;grid-template-columns:minmax(0,1fr) minmax(230px,.82fr) minmax(0,1fr)}
+ .grand .grand-crystal{width:230px;height:218px}
+ .grand .grand-crystal>.heart{width:148px}
+ .grand.transformed .grand-crystal>.heart{width:160px}
+ .grand .grand-progress strong{font-size:28px}
+ .grand .grand-progress>p{margin:10px 0 14px}
+}
+@media(min-width:1450px){
+ .app .world{column-gap:24px}
+ .grand .grand-crystal{height:246px;width:248px}
+ .grand .grand-crystal>.heart{width:165px}
+ .grand.transformed .grand-crystal>.heart{width:178px}
+ .grand .grand-progress strong{font-size:30px}
+}
+@media(min-width:641px) and (max-width:1000px){
+ .app .world{column-gap:10px;grid-template-columns:minmax(0,1fr) minmax(210px,.82fr) minmax(0,1fr)}
+ .grand .grand-crystal{width:200px;height:190px}
+ .grand .grand-crystal>.heart{width:125px}
+ .grand.transformed .grand-crystal>.heart{width:138px}
+}
+@media(max-width:640px){
+ .grand-games .mini-games-launcher{margin:18px auto 24px;max-width:350px}
+}
