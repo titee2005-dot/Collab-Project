@@ -1,8 +1,19 @@
 import {heartTypes} from '../data/heartTypes.js';
 import {api} from './api.js';
+import {backend,getSupabase} from './supabaseClient.js';
+import {publicMemory} from './heartMemories.js';
 let cache=[];
 export const getDonations=()=>cache;
-export async function refreshDonations(){const data=await api('/donations');if(!Array.isArray(data))throw new Error('ข้อมูลโดเนทไม่ถูกต้อง');cache=data;return data;}
+export async function refreshDonations(ids=[]){
+ if(backend==='local'){const data=await api('/donations');cache=data.map(publicMemory).filter(Boolean);return cache;}
+ const {data,error}=await getSupabase().rpc('heart_world',{p_ids:ids.slice(0,100)});if(error)throw error;
+ const rows=data.donations.map(publicMemory).filter(Boolean);rows.collectionStats=getCollectionStats(data.groups);cache=rows;return rows;
+}
+export async function fetchMemories({recipient=null,type=null,search='',oldest=false,cursor=null,ids=null}={}){
+ if(backend==='local'){const data=(await api('/donations')).map(publicMemory).filter(Boolean).filter(d=>(!recipient||d.recipient===recipient)&&(!type||d.heartType===type)&&(!ids||ids.includes(d.id))&&(!search||!d.anonymous&&d.supporterName.toLowerCase().includes(search.toLowerCase())||d.id===search)).sort((a,b)=>(a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id))*(oldest?1:-1));return data.filter(d=>!cursor||((d.createdAt.localeCompare(cursor.stamp)||d.id.localeCompare(cursor.id))*(oldest?1:-1)>0)).slice(0,24);}
+ if(ids?.length>100){const rows=[];for(let i=0;i<ids.length;i+=100)rows.push(...await fetchMemories({recipient,type,search,oldest,cursor,ids:ids.slice(i,i+100)}));return rows.sort((a,b)=>(a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id))*(oldest?1:-1)).slice(0,24);}
+ const {data,error}=await getSupabase().rpc('heart_memories',{p_recipient:recipient,p_type:type,p_search:search,p_oldest:oldest,p_cursor:cursor,p_ids:ids});if(error)throw error;return data.map(publicMemory).filter(Boolean);
+}
 export const getDonationById=id=>cache.find(d=>d.id===id);
 export const getRecentDonations=(donations=cache,limit=8)=>[...donations].sort((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt)).slice(0,limit);
 export function getCollectionStats(donations){

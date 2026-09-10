@@ -106,3 +106,15 @@ RPC heart_hatch รวมยอดแบบ transaction และป้องก
 ไม่มี Edge Function สำหรับคลิกเกม แต่ยังใช้โควต้า Database/Realtime และ bandwidth ตามจำนวนผู้เล่นและระยะเวลาเปิดเว็บ การส่งเป็นชุดช่วยลดการใช้ ไม่รับประกันว่ารองรับผู้เล่นจำนวนใดบนแผนฟรีได้ไม่จำกัด
 
 บนมือถือมินิเกมอยู่ใต้ห้อง ใช้แท็บเลือกไข่โรสหรือแพรว สัตว์แต่ละตัวแสดงเมื่อยอดกลางของตัวนั้นครบ 100,000 เท่านั้น หน้า localhost ใช้ Vite proxy /supabase-api สำหรับ API โดเนท
+
+## Latest Heart Update
+
+สถานะกลาง CollectionProvider ใช้ createCollectionSync แยก initial/manual/catchup/live ยอด Rose, Praew, Grand Heart และ Collection อ่าน donations ชุดเดียวกัน ปุ่มใกล้ Grand Heart ตรวจล่าสุดโดยไม่รีโหลดหน้า ล็อก request และ cooldown 4 วินาที เวลาเทียบปัจจุบันอัปเดตในเครื่องทุก 15 วินาทีโดยไม่ query
+
+แทนที่การตรวจโดเนททุก 5 วินาทีด้วย Realtime INSERT จาก public.heart_collection_events (id + approved_at เท่านั้น) trigger ทำงานหลัง insert donation ที่อนุมัติใน transaction เดียวกัน เหตุการณ์ใหม่ขณะเปิดหน้าเท่านั้นมีสิทธิ์เล่น arrival หลังตรวจพบ ID ใน approved state ที่ fetch กลับมา initial/manual/reconnect/กลับจากแท็บซ่อนอัปเดตอย่างเงียบ ๆ ไม่ replay รายการย้อนหลัง การกลับแท็บนานกว่า 60 วินาทีหรือมีเหตุการณ์ขณะซ่อนทำ catchup ครั้งเดียว ส่วน Realtime reconnect ตรวจ catchup อีกครั้งโดย serialize request
+
+เมื่อ refresh ผิดพลาดเก็บยอดล่าสุดและ timestamp เดิม ไม่เปิดเผย raw error ไม่มี donation polling interval อีกต่อไป เกมฟักไข่ใช้ระบบเดิมแยกจากยอดเงินจริง
+
+## Heart Memory / live arrival / room evolution
+
+See [the implementation and local approval guide](docs/heart-world-upgrade.md). Includes migration status, changed files, privacy, batching, tests and deployment handoff. The latest-heart-update label remains display-only; there is no public manual refresh button.

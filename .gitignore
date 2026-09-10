@@ -13,3 +13,8 @@ supabase/.temp/
 
 .vercel
 .env*
+
+# Local browser verification artifacts
+*.local.mjs
+*.local.png
+*.local.jpg

@@ -56,3 +56,11 @@ URL: https://ctimhxkwpzsebodbtptx.supabase.co
 ## เกมฟักไข่ยอดรวม Realtime 2026-09-09
 
 ติดตั้ง migration 202609090004_global_hatching.sql แล้ว ไข่แต่ละตัวใช้ยอดรวม 100,000 คลิก RPC batch สูงสุด 100 คลิก / 2 วินาที Realtime public snapshot ไม่ถี่กว่า 2 วินาที ไม่มีข้อมูลผู้เล่นใน snapshot ทดสอบ 54 tests และ build ผ่าน ทดสอบรับ UPDATE ผ่าน Supabase Realtime จริงโดยอัปเดตเฉพาะ timestamp ไม่เพิ่มยอดเกม
+
+## Latest Heart Update / Collection Realtime
+
+ติดตั้ง 202609100005_collection_realtime.sql แล้ว เพิ่ม public ID-only approval events และ trigger หลัง credit donation ไม่เปลี่ยนยอดหรือสถานะรับเงิน npm test 65 ผ่าน และ npm run build ผ่าน ตรวจ manual/live separation, cooldown, concurrent events, failure preservation, silent catchup และ transaction rollback ของ event
+
+## Heart Memory reads
+
+Migration `202609100006_heart_memories.sql` adds bounded public snapshot/memory RPCs using the existing approval/event architecture. It has been applied to the linked project. No Edge Function change or new secret is required. Vercel frontend deployment is left to the owner. See [the upgrade guide](../docs/heart-world-upgrade.md).

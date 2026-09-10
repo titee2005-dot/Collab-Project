@@ -1,0 +1,59 @@
+/* Minimal pastel styling for the standalone hatching page. */
+.games-page:has(.hatch-section){--hatch-ink:#71566a;background:linear-gradient(135deg,#f8f0f3,#faf5ed);color:var(--hatch-ink)}
+.games-page:has(.hatch-section) .games-page-nav{position:static;max-width:1040px;padding:22px 24px 12px;background:transparent;border:0;backdrop-filter:none;gap:16px}
+.games-page:has(.hatch-section) .games-home-button{min-height:44px;padding:10px 12px;border:0;border-radius:24px;background:transparent;color:#79596e;font-size:13px;font-weight:500;box-shadow:none;white-space:nowrap}
+.games-page:has(.hatch-section) .games-home-button svg{width:18px;height:18px}
+.games-page:has(.hatch-section) .games-home-button:hover{background:#eee2e9;color:#63485c}
+.games-page:has(.hatch-section) .games-home-button:active{transform:none;box-shadow:none}
+.games-page:has(.hatch-section) .games-home-button:focus-visible{outline:2px solid #a47794;outline-offset:3px}
+.games-page:has(.hatch-section) .games-page-nav>span{font-size:9px;letter-spacing:2px;color:#8c7181}
+.games-page:has(.hatch-section) .games-page-main{max-width:1000px;padding:16px 24px 48px}
+.games-page:has(.hatch-section) .games-page-title{font-family:'Opun Mai Thai','DM Sans',Tahoma,sans-serif;font-size:clamp(24px,3vw,30px);font-weight:500;line-height:1.5;letter-spacing:0;margin:10px 0 12px;color:#705466}
+.games-page .hatch-section{position:relative;max-width:none;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+.games-page .hatch-heading>span{display:none}
+.games-page .hatch-heading p{font-size:12px;line-height:1.8;margin:0;color:#836b79}
+.games-page .hatch-sync{max-width:100%;margin:8px auto 28px;padding:0;border:0;background:transparent;color:#836b79;font-size:11px;line-height:1.8;text-align:center}
+.games-page .hatch-pair{gap:24px;max-width:none;align-items:stretch}
+.games-page .hatch-pane{--egg-accent:#bb92ad;--egg-dark:#805f77;--egg-soft:#eee0e9;--egg-edge:#e5d5df;--egg-dot:#e4c3d7;--egg-fill:#fff3e6;--egg-halo:#f1e4ee;--egg-card:#fcf7fa}
+.games-page .pane-praew{--egg-accent:#bca17b;--egg-dark:#836d51;--egg-soft:#f0e6d6;--egg-edge:#e8ddcc;--egg-dot:#e5cfac;--egg-fill:#fff6e5;--egg-halo:#f6ecda;--egg-card:#fffbf4}
+.games-page .hatch-pair .hatch-game{height:100%;margin:0;padding:28px 24px 24px;overflow:hidden;border:1px solid var(--egg-edge);border-radius:24px;background:var(--egg-card);box-shadow:none;color:#71566a}
+.games-page .hatch-game h2{font-family:'Opun Mai Thai','DM Sans',Tahoma,sans-serif;font-size:20px;font-weight:500;line-height:1.6;margin:0 0 8px;color:var(--egg-dark)}
+.games-page .hatch-game p{max-width:300px;margin:auto;font-size:12px;line-height:1.9;color:#806d79}
+.games-page .hatch-egg{width:210px;max-width:100%;margin:22px auto 12px;padding:12px 15px 22px;border-radius:50%;background:radial-gradient(ellipse,var(--egg-halo),transparent 70%);transition:filter .2s;touch-action:manipulation}
+.games-page .hatch-egg:hover:not(:disabled){filter:drop-shadow(0 3px 8px var(--egg-soft))}
+.games-page .hatch-egg:focus-visible{outline:2px solid var(--egg-dark);outline-offset:5px}
+.games-page .hatch-egg:disabled{opacity:.65}
+.games-page .hatch-egg svg{filter:drop-shadow(0 5px 10px #94718410)}
+.games-page .hatch-egg svg>path:first-of-type{fill:var(--egg-fill);stroke:var(--egg-accent);stroke-width:2.5px}
+.games-page .hatch-egg svg>g:first-of-type{fill:var(--egg-dot)}
+.games-page .hatch-tap{bottom:4px;left:0;right:0;padding:0;border:0;background:none;box-shadow:none;color:var(--egg-dark);font-size:10px;font-weight:500;letter-spacing:1px}
+.games-page .hatch-meter{max-width:280px;gap:12px;margin:18px auto 8px;padding:0;border:0;background:transparent}
+.games-page .hatch-meter strong{font-size:clamp(22px,2.3vw,28px);font-weight:500;letter-spacing:-.5px;color:var(--egg-dark);line-height:1.5}
+.games-page .hatch-meter progress{display:block;appearance:none;-webkit-appearance:none;width:100%;height:6px;overflow:hidden;border:0;border-radius:10px;background:var(--egg-soft);color:var(--egg-accent)}
+.games-page .hatch-meter progress::-webkit-progress-bar{background:var(--egg-soft);border-radius:10px}
+.games-page .hatch-meter progress::-webkit-progress-value{background:var(--egg-accent);border-radius:10px}
+.games-page .hatch-meter progress::-moz-progress-bar{background:var(--egg-accent);border-radius:10px}
+.games-page .hatch-meter>span{font-size:12px;line-height:1.7;color:var(--egg-dark)}
+.games-page .hatch-game>small{font-size:10px;color:#836e7b;margin-top:16px;line-height:1.8}
+.games-page .hatch-complete{display:flex;flex-direction:column;justify-content:center;min-height:380px}
+.games-page .hatch-complete>span{font-size:30px;color:var(--egg-dark)}
+.games-page .hatch-complete p{font-size:17px;font-weight:500}
+.games-page .hatch-friends button{min-height:44px;padding:10px 16px;border:0;border-radius:24px;background:var(--egg-soft);color:var(--egg-dark)}
+@media(max-width:640px){
+ .games-page:has(.hatch-section) .games-page-nav{padding:12px 14px 4px;gap:8px}
+ .games-page:has(.hatch-section) .games-page-nav>span{font-size:8px;letter-spacing:1px}
+ .games-page:has(.hatch-section) .games-page-main{padding:12px 16px 32px}
+ .games-page:has(.hatch-section) .games-page-title{margin:8px 0 10px}
+ .games-page .hatch-section{padding:0;border:0;background:transparent}
+ .games-page .hatch-sync{margin:10px auto 20px;font-size:10px}
+ .games-page .hatch-tabs{gap:4px;padding:4px;background:#efe6eb;border:0;border-radius:24px;margin:18px 0 12px}
+ .games-page .hatch-tabs button{min-height:44px;border-radius:20px;font-size:12px;font-weight:500}
+ .games-page .hatch-tabs button[aria-pressed=true]{background:#fcf7fa;color:#79576f;box-shadow:none;font-weight:500}
+ .games-page .hatch-tabs button:last-child[aria-pressed=true]{background:#fff8ec;color:#816b4e}
+ .games-page .hatch-pair .hatch-game{padding:24px 18px 22px;border:1px solid var(--egg-edge);border-radius:22px;background:var(--egg-card)}
+ .games-page .hatch-game h2{font-size:19px}
+ .games-page .hatch-egg{width:200px;margin:18px auto 12px}
+ .games-page .hatch-meter{max-width:260px}
+ .games-page .hatch-meter strong{font-size:26px}
+}
+@media(prefers-reduced-motion:reduce){.games-page .hatch-egg{transition:none}}

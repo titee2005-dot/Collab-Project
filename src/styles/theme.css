@@ -1,0 +1,60 @@
+:root{color-scheme:light}
+.theme-toggle{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-width:44px;min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:24px;flex-shrink:0;font-size:11px;color:var(--ink);background:transparent}
+.theme-toggle:hover{background:#eadde6}
+.games-nav-tools{display:flex;align-items:center;gap:18px}
+.games-nav-tools>span{font-size:9px;letter-spacing:2px;color:var(--muted)}
+@media(max-width:1100px){.topbar>.theme-toggle span{display:none}.topbar{gap:12px}}
+@media(max-width:640px){.topbar>.theme-toggle{margin-left:auto}.topbar>.mobile-total{display:none}.games-nav-tools>span{display:none}.games-nav-tools{gap:0}.games-nav-tools .theme-toggle{font-size:10px}}
+:root[data-theme=dark]{color-scheme:dark;--ink:#ebdce8;--muted:#c3adc0;--rose:#e5afce;--line:#574353;--night:#241e29;--surface:#302735;--raised:#3b3040;background:var(--night);color:var(--ink)}
+[data-theme=dark] body{background:var(--night);color:var(--ink)}
+[data-theme=dark] .app,[data-theme=dark] .games-page,[data-theme=dark] .games-page:has(.hatch-section){background:radial-gradient(ellipse at top left,#392b3c55,transparent 65%),var(--night);color:var(--ink);--hatch-ink:var(--ink)}
+[data-theme=dark] :is(.topbar,.games-page-nav){border-color:var(--line);background:var(--night)}
+[data-theme=dark] .games-page:has(.hatch-section) .games-page-nav{background:transparent}
+[data-theme=dark] :is(.brand-icon,.brand-icon svg:last-child,.sigil,.activity-gem,.mobile-tabs,.hatch-tabs){background:var(--raised);color:#dec0d4;border-color:var(--line)}
+[data-theme=dark] :is(.modal,.toast,.mobile-nav,.hatch-section,.hatch-game,.mini-games-open,.mini-games-menu button,.games-page-list a,.item-preview-panel,.supporter-message,.familiar-thought,.familiar-greeting,.admin-page,.admin-login,.admin-order){background:var(--surface);color:var(--ink);border-color:var(--line);box-shadow:none}
+[data-theme=dark] .modal::backdrop{background:#100c16b8}
+[data-theme=dark] :is(.world-caption,.eyebrow,.shelf-label,.mini-games-intro,.mini-games-heading,.games-page-heading,.games-page-title,.hatch-heading,.hatch-sync,.heart-update-time,.heart-sync-feedback,.evolution-notice,.muted){color:var(--muted)}
+[data-theme=dark] :is(.room-heading,.grand-top,.grand-progress,.section-heading,.count,.games-page-title,.hatch-game h2,.modal h2,.modal h3){color:var(--ink)}
+[data-theme=dark] :is(.app,.games-page,.modal,.admin-page) :is(small, label){color:var(--muted)}
+[data-theme=dark] :is(.mini-games-open,.mini-games-menu button,.games-page-list a,.hatch-heading,.hatch-game,.games-page-heading) :is(p,small){color:var(--muted)}
+[data-theme=dark] .theme-toggle{color:var(--ink);border-color:var(--line)}
+[data-theme=dark] :is(.theme-toggle,.mini-games-open,.mini-games-menu button,.games-page-list a):hover{background:var(--raised);color:var(--ink)}
+[data-theme=dark] .games-page:has(.hatch-section) .games-home-button{color:#e1c6d8;background:transparent}
+[data-theme=dark] .games-page:has(.hatch-section) .games-home-button:hover{background:var(--raised);color:var(--ink)}
+[data-theme=dark] :is(.primary,.mobile-collect){background:#976481;color:#fff5fc;border-color:#b883a0}
+[data-theme=dark] .primary:hover:not(:disabled){background:#a57390;color:#fff5fc}
+[data-theme=dark] :is(.secondary,.recipient-option,.heart-options button,.quantity button,.search-field,.review,.payment,.steps,.tabs,.history-total,.memory-summary,.memory-empty,.memory-story,.story-receipt,.book-grid article,.cabinet-grid article){background:var(--surface);color:var(--ink);border-color:var(--line)}
+[data-theme=dark] :is(input,textarea,select){background:var(--night);color:var(--ink);border-color:var(--line)}
+[data-theme=dark] :is(input,textarea)::placeholder{color:#b09aad}
+[data-theme=dark] :is(.recipient-option.selected,.heart-options button.selected,.tabs button.active,.mobile-tabs button.active,.hatch-tabs button[aria-pressed=true]){background:#564052;color:#fff1fb;border-color:#bc8fab;box-shadow:none}
+[data-theme=dark] :is(.memory-tile,.heart-memory-card){background:linear-gradient(145deg,var(--raised),var(--surface));color:var(--ink);border-color:var(--line)}
+[data-theme=dark] :is(.progress,.room-evolution-progress>div){background:#4d3b49}
+[data-theme=dark] .arch{background:radial-gradient(ellipse at top,#55415f,#392d46);border-color:#786080;box-shadow:inset 0 0 0 6px #302633,inset 0 0 0 7px #66506a}
+[data-theme=dark] .praew .arch{background:radial-gradient(ellipse at top,#615044,#40343b);border-color:#8b735b;box-shadow:inset 0 0 0 6px #322b30,inset 0 0 0 7px #74614f}
+[data-theme=dark] .room:has(.environment-window) .arch{background:linear-gradient(155deg,#514360,#402c45)}
+[data-theme=dark] .room.praew:has(.environment-window) .arch{background:linear-gradient(155deg,#61503f,#47323d)}
+[data-theme=dark] .room-stats .count .room-heart-arrow{background:var(--raised);color:var(--ink);border-color:var(--line);box-shadow:none}
+[data-theme=dark] .grand-tier{background:#493747;color:#f2d1e6;border-color:#aa7d99}
+[data-theme=dark] .grand-tier :is(small,b){color:#f2d1e6}
+[data-theme=dark] .grand .grand-progress>p strong{color:#ebc6dc}
+[data-theme=dark] .games-page .hatch-section{background:transparent}
+[data-theme=dark] .hatch-pane{--egg-accent:#c59ebc;--egg-dark:#e2c4da;--egg-soft:#554152;--egg-edge:#584353;--egg-dot:#d8b6cd;--egg-fill:#efe0e9;--egg-halo:#4d354c;--egg-card:#302733}
+[data-theme=dark] .pane-praew{--egg-accent:#cbb18c;--egg-dark:#e5cfac;--egg-soft:#53483e;--egg-edge:#5b4c40;--egg-dot:#dcc49f;--egg-fill:#f0e5d2;--egg-halo:#4a3d33;--egg-card:#322c2c}
+[data-theme=dark] .games-page .hatch-pair .hatch-game{background:var(--egg-card);border-color:var(--egg-edge);color:var(--ink)}
+[data-theme=dark] .games-page .hatch-game h2,[data-theme=dark] .games-page .hatch-meter :is(strong,span){color:var(--egg-dark)}
+[data-theme=dark] .games-page .hatch-tabs{background:var(--surface)}
+[data-theme=dark] .games-page .hatch-tabs button[aria-pressed=true]{background:#514051;color:#f0d8e8}
+[data-theme=dark] .games-page .hatch-tabs button:last-child[aria-pressed=true]{background:#514539;color:#f0dec2}
+/* Preserve original colors in payment codes and exported keepsakes. */
+[data-theme=dark] .payment-qr{background:white;color:#30242c;color-scheme:light}
+
+/* Icon-only sun/moon rotation, matching the reference's staggered timing. */
+.theme-toggle{display:grid;place-items:center;position:relative;width:44px;height:44px;min-width:44px;padding:4px;border:0;border-radius:50%;background:transparent;line-height:1;gap:0;transition:background .4s cubic-bezier(.23,1,.32,1)}
+.theme-toggle .theme-glyph{grid-area:1/1;display:flex;align-items:center;justify-content:center;pointer-events:none;transform-origin:center;transition:transform .5s cubic-bezier(.34,1.56,.64,1),opacity .3s}
+.theme-glyph svg{width:20px;height:20px;display:block}
+.theme-toggle .theme-glyph-sun{opacity:1;transform:rotate(0) scale(1);transition-delay:.15s}
+.theme-toggle .theme-glyph-moon{opacity:0;transform:scale(0) rotate(-45deg)}
+.theme-toggle[aria-pressed=true] .theme-glyph-sun{opacity:0;transform:rotate(360deg) scale(0);transition-delay:0s}
+.theme-toggle[aria-pressed=true] .theme-glyph-moon{opacity:1;transform:scale(1) rotate(360deg);transition-delay:.15s}
+.theme-toggle:focus-visible{outline:2px solid var(--rose);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.theme-toggle,.theme-toggle .theme-glyph{transition:none}}

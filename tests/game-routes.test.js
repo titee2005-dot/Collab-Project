@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {gameRoute} from '../src/games/routes.js';
+test('game routes support direct links, trailing slash and unknown game',()=>{assert.deepEqual(gameRoute('/games/'),{type:'list'});assert.equal(gameRoute('/games/hatching/').game.id,'hatching');assert.equal(gameRoute('/games/not-found').type,'missing');assert.equal(gameRoute('/games/hatching/extra').type,'missing');assert.equal(gameRoute('/'),null);assert.equal(gameRoute('/adminpage-settings'),null);});

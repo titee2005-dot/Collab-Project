@@ -15,7 +15,7 @@ export default function Modal({title, onClose, children, wide = false}) {
       document.body.style.overflow = overflow;
       const previous = trigger.current;
       queueMicrotask(() => {
-        if (previous?.isConnected && !document.querySelector('dialog[open]')) {
+        if (previous?.isConnected && (!document.querySelector('dialog[open]') || previous.closest('dialog[open]'))) {
           previous.focus({preventScroll: true});
         }
       });
@@ -23,7 +23,7 @@ export default function Modal({title, onClose, children, wide = false}) {
   }, []);
 
   return <dialog ref={dialog} className={`modal ${wide ? 'wide' : ''}`} aria-label={title}
-    onCancel={event => {event.preventDefault(); onClose();}}
+    onCancel={event => {event.preventDefault(); event.stopPropagation(); onClose();}}
     onClick={event => {
       if (event.target !== dialog.current) return;
       const rect = dialog.current.getBoundingClientRect();
