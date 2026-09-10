@@ -8,7 +8,7 @@
 .games-page:has(.hatch-section) .games-home-button:focus-visible{outline:2px solid #a47794;outline-offset:3px}
 .games-page:has(.hatch-section) .games-page-nav>span{font-size:9px;letter-spacing:2px;color:#8c7181}
 .games-page:has(.hatch-section) .games-page-main{max-width:1000px;padding:16px 24px 48px}
-.games-page:has(.hatch-section) .games-page-title{font-family:'Opun Mai Thai','DM Sans',Tahoma,sans-serif;font-size:clamp(24px,3vw,30px);font-weight:500;line-height:1.5;letter-spacing:0;margin:10px 0 12px;color:#705466}
+.games-page:has(.hatch-section) .games-page-title{font-family:'Mitr Thai','DM Sans',Tahoma,sans-serif;font-size:clamp(24px,3vw,30px);font-weight:500;line-height:1.5;letter-spacing:0;margin:10px 0 12px;color:#705466}
 .games-page .hatch-section{position:relative;max-width:none;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
 .games-page .hatch-heading>span{display:none}
 .games-page .hatch-heading p{font-size:12px;line-height:1.8;margin:0;color:#836b79}
@@ -17,7 +17,7 @@
 .games-page .hatch-pane{--egg-accent:#bb92ad;--egg-dark:#805f77;--egg-soft:#eee0e9;--egg-edge:#e5d5df;--egg-dot:#e4c3d7;--egg-fill:#fff3e6;--egg-halo:#f1e4ee;--egg-card:#fcf7fa}
 .games-page .pane-praew{--egg-accent:#bca17b;--egg-dark:#836d51;--egg-soft:#f0e6d6;--egg-edge:#e8ddcc;--egg-dot:#e5cfac;--egg-fill:#fff6e5;--egg-halo:#f6ecda;--egg-card:#fffbf4}
 .games-page .hatch-pair .hatch-game{height:100%;margin:0;padding:28px 24px 24px;overflow:hidden;border:1px solid var(--egg-edge);border-radius:24px;background:var(--egg-card);box-shadow:none;color:#71566a}
-.games-page .hatch-game h2{font-family:'Opun Mai Thai','DM Sans',Tahoma,sans-serif;font-size:20px;font-weight:500;line-height:1.6;margin:0 0 8px;color:var(--egg-dark)}
+.games-page .hatch-game h2{font-family:'Mitr Thai','DM Sans',Tahoma,sans-serif;font-size:20px;font-weight:500;line-height:1.6;margin:0 0 8px;color:var(--egg-dark)}
 .games-page .hatch-game p{max-width:300px;margin:auto;font-size:12px;line-height:1.9;color:#806d79}
 .games-page .hatch-egg{width:210px;max-width:100%;margin:22px auto 12px;padding:12px 15px 22px;border-radius:50%;background:radial-gradient(ellipse,var(--egg-halo),transparent 70%);transition:filter .2s;touch-action:manipulation}
 .games-page .hatch-egg:hover:not(:disabled){filter:drop-shadow(0 3px 8px var(--egg-soft))}
