@@ -161,6 +161,13 @@ test('Edge Function requests use real PostgreSQL transactions with mocked Auth, 
   const setPassword=(scope,password='test-password-1234')=>request('/admin/reviewer-password',{method:'POST',token:'admin-token',body:{scope,password}});
   const signIn=async(scope,password='test-password-1234')=>request('/reviewer/login',{method:'POST',body:{scope,password}});
   assert.equal((await signIn('rose')).status,401);
+  assert.equal((await setPassword('rose','')).status,400);
+  assert.equal((await signIn('rose','')).status,401);
+  for(const password of ['1','ก','x'.repeat(129)]){
+   assert.equal((await setPassword('rose',password)).status,200);
+   assert.equal((await signIn('rose',password)).status,200);
+   assert.equal((await signIn('rose',password+'wrong')).status,401);
+  }
   for(const scope of ['rose','praew','all'])assert.equal((await setPassword(scope)).status,200);
   assert.equal((await signIn('rose','incorrect')).status,401);
   const rose=await (await signIn('rose')).json(),all=await (await signIn('all')).json();

@@ -49,7 +49,7 @@ export function createHandler({db,env,verify=verifySlip}){
    };
    const readJSON=async()=>JSON.parse(new TextDecoder().decode(await body()));
    if(path==='/reviewer/login'&&req.method==='POST'){
-    const b=await readJSON();if(!['rose','praew','all'].includes(b.scope)||typeof b.password!=='string'||b.password.length>128)throw error('รหัสผ่านไม่ถูกต้อง',401);
+    const b=await readJSON();if(!['rose','praew','all'].includes(b.scope)||typeof b.password!=='string'||b.password.length===0)throw error('รหัสผ่านไม่ถูกต้อง',401);
     if(!(await rpc('rate',{key:'reviewer-login:'+b.scope})).allowed)throw error('ลองรหัสผ่านหลายครั้งเกินไป กรุณารอสักครู่',429);
     const credentials=await rpc('reviewer_credentials',{scope:b.scope});
     const candidate=await passwordHash(b.password,credentials?.salt||'00000000000000000000000000000000');
@@ -60,7 +60,7 @@ export function createHandler({db,env,verify=verifySlip}){
    if(path==='/reviewer/logout'&&req.method==='POST'){if(!reviewerHash)throw error('เซสชันไม่ถูกต้อง',401);return json(await rpc('reviewer_logout'));}
    if(path==='/admin/reviewer-password'&&req.method==='POST'){
     await rpc('settings',{},actor);const b=await readJSON();
-    if(!['rose','praew','all'].includes(b.scope)||typeof b.password!=='string'||b.password.length<12||b.password.length>128)throw error('รหัสผ่านต้องยาว 12–128 ตัวอักษร');
+    if(!['rose','praew','all'].includes(b.scope)||typeof b.password!=='string'||b.password.length===0)throw error('กรุณากรอกรหัสผ่าน');
     const salt=randomHex(16);return json(await rpc('reviewer_password',{scope:b.scope,salt,passwordHash:await passwordHash(b.password,salt)},actor));
    }
    if(path==='/config'&&req.method==='GET'){

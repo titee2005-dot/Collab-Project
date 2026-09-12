@@ -6,7 +6,7 @@ export default function ReviewerPasswords({configured={},busy,onSave}){
 function PasswordRow({scope,configured,busy,onSave}){
  const [password,setPassword]=useState('');
  return <form className="supporter-form" onSubmit={async e=>{e.preventDefault();await onSave(scope,password);setPassword('');}}>
- <label>{scope==='rose'?'โรส':scope==='praew'?'แพรว':'รวมทั้งสองฝั่ง'} · {configured?'ตั้งรหัสแล้ว':'ยังไม่มีรหัส'}<input type="password" autoComplete="new-password" minLength={12} maxLength={128} required value={password} onChange={e=>setPassword(e.target.value)} placeholder="รหัสใหม่อย่างน้อย 12 ตัวอักษร"/></label>
+ <label>{scope==='rose'?'โรส':scope==='praew'?'แพรว':'รวมทั้งสองฝั่ง'} · {configured?'ตั้งรหัสแล้ว':'ยังไม่มีรหัส'}<input type="password" autoComplete="new-password" required value={password} onChange={e=>setPassword(e.target.value)} placeholder="กรอกรหัสผ่านใหม่"/></label>
  <button className="secondary" disabled={busy}>บันทึกรหัส{scope==='rose'?'โรส':scope==='praew'?'แพรว':'หน้ารวม'}</button></form>;
 }
 
