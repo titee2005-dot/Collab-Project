@@ -1,15 +1,27 @@
-const thresholds=[100,250,500,750,1000,1500,2000];
-const kinds=['ribbon','potion','wand','familiar-charm','mirror','crown','book'];
-const descriptions=[
- 'A ribbon for the room, and a matching bow for your little companion.',
- 'A glowing potion finds its place on the shelf beside the heart jar.',
- 'A magical wand rests beside the jar. Your companion learns a little happy shuffle.',
- 'A lucky charm joins your companion’s bow. Your friend has been here from the very first heart.',
- 'A new treasure catches the light beside the moonlit window.',
- 'A little crown above the jar, and one for your faithful companion.',
- 'An open spellbook rests on the shelf, full of the stories you collected together.',
-];
-export const collectibleItems={
- rose:['Rose Ribbon','Rabbit Moon Charm','Rose Potion','Rose Spellbook','Moon Wand','Moon Mirror','Rose Crown'].map((name,i)=>({id:`rose-${i}`,name,at:thresholds[i],kind:kinds[i],description:descriptions[i]})),
- praew:['Star Ribbon','Golden Potion','Star Wand','Alpaca Star Charm','Sun Crystal','Star Crown','Butterfly Spellbook'].map((name,i)=>({id:`praew-${i}`,name,at:thresholds[i],kind:i===4?'crystal':kinds[i],description:i===4?'A sun crystal catches warm light beside the magical window.':descriptions[i]})),
+const thresholds = [100, 250, 500, 750, 1000, 1500, 2000];
+const definitions = {
+ rose: [
+  ['Rose Ribbon','ribbon',6397], ['Rose Potion','potion',6401],
+  ['Moon Wand','wand',6405], ['Rabbit Moon Charm','familiar-charm',6399],
+  ['Moon Crystal','mirror',6407], ['Rose Crown','crown',6409],
+  ['Rose Spellbook','book',6403],
+ ],
+ praew: [
+  ['Star Ribbon','ribbon',6398], ['Golden Potion','potion',6402],
+  ['Star Wand','wand',6406], ['Alpaca Star Charm','familiar-charm',6400],
+  ['Sun Crystal','crystal',6408], ['Star Crown','crown',6410],
+  ['Butterfly Spellbook','book',6404],
+ ],
 };
+const descriptions = [
+ 'A ribbon on your display shelf, and a matching bow for your little companion.',
+ 'A magical potion joins the treasures on your display shelf.',
+ 'A magical wand joins your collection. Your companion learns a little happy shuffle.',
+ 'A lucky charm on the shelf, and a matching charm for your companion.',
+ 'A crystal catches the light on your display shelf.',
+ 'A little crown for your collection, and one for your faithful companion.',
+ 'A spellbook full of the stories you collected together.',
+];
+export const collectibleItems = Object.fromEntries(Object.entries(definitions).map(([recipient,items])=>[
+ recipient, items.map(([name,kind,image],i)=>({id:`${recipient}-${i}`,name,kind,at:thresholds[i],description:descriptions[i],artwork:`/items/drive/IMG_${image}.PNG`})),
+]));

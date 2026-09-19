@@ -180,3 +180,28 @@ test('provider quota and authorization errors request a global pause',async t=>{
  result=await verifySlip(png(),'image/png',cleanForm(form),configuration(env).accounts.rose,'test-key');
  assert.equal(result.pauseAuto,true);
 });
+
+
+test('simple manual approval and approved deletion reverse credit exactly once',async t=>{
+ const s=setup(t),bytes=png(),input={id:randomUUID(),form};const o=await s.submit(input,bytes);
+ assert.throws(()=>s.review(o.id,{decision:'approve',reviewMethod:'manual',confirmed:false,reason:'Checked'}));
+ assert.equal(s.review(o.id,{decision:'approve',reviewMethod:'manual',confirmed:true,reason:'Checked'}).status,'approved');
+ assert.equal(s.publicDonations().reduce((n,d)=>n+d.quantity,0),3);
+ assert.throws(()=>s.deleteApproved(o.id,{confirmed:true,scope:'praew'}),/สิทธิ์/);
+ assert.throws(()=>s.deleteApproved(o.id,{confirmed:false}));
+ s.db.exec("CREATE TRIGGER fail_delete BEFORE DELETE ON donations BEGIN SELECT RAISE(ABORT,'test deletion failure'); END;");
+ assert.throws(()=>s.deleteApproved(o.id,{confirmed:true,scope:'rose'}));assert.equal(s.get(o.id).status,'approved');assert.equal(s.publicDonations().length,1);
+ s.db.exec('DROP TRIGGER fail_delete');
+ assert.equal(s.deleteApproved(o.id,{confirmed:true,scope:'rose'}).status,'deleted');
+ s.deleteApproved(o.id,{confirmed:true});s.review(o.id,{decision:'approve',reviewMethod:'manual',confirmed:true,reason:'Retry'});
+ assert.equal(s.publicDonations().length,0);assert.equal(s.get(o.id).audit.filter(a=>a.action==='deleted').length,1);
+ assert.equal((await s.submit(input,bytes)).status,'deleted');
+ await assert.rejects(s.submit({id:randomUUID(),form},bytes),/ถูกใช้แล้ว/);
+ const pending=await s.submit({id:randomUUID(),form},png());assert.throws(()=>s.deleteApproved(pending.id,{confirmed:true}),/อนุมัติ/);
+});
+test('external payment can omit bank time/reference and remain idempotent',async t=>{
+ const s=setup(t),ext=external();delete ext.paidAt;delete ext.externalRef;const input={id:randomUUID(),form};
+ const o=await s.submit(input,null,undefined,ext);assert.equal(o.status,'approved');assert.equal(o.paidAt,undefined);assert.equal(o.externalRef,undefined);
+ await s.submit(input,null,undefined,ext);assert.equal(s.publicDonations().length,1);
+ s.deleteApproved(o.id,{confirmed:true});await s.submit(input,null,undefined,ext);assert.equal(s.publicDonations().length,0);
+});

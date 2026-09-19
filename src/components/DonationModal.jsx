@@ -1,3 +1,4 @@
+import '../styles/payment-summary.css';
 import {useEffect,useRef,useState} from 'react';
 import Modal from './Modal';
 import {paymentQR} from '../services/paymentQR';
@@ -26,7 +27,11 @@ export default function DonationModal({initialRecipient,onClose}){
  <label>Social username (ไม่บังคับ)<input disabled={form.anonymous} maxLength={40} value={form.socialUsername} onChange={e=>set('socialUsername',e.target.value)}/></label>
  <p className="total-line">ยอดโดเนท <b>{heart.price*form.quantity} THB</b></p><button className="primary">ตรวจบัญชีและโอนเงิน →</button>
  </>:<>
- <div className="payment"><Heart color={heart.color}/><b>ส่งหัวใจให้ {form.recipient==='rose'?'โรส':'แพรว'}</b><p>{account.bankName}<br/>{account.accountName}<br/><strong>{account.accountNumber}</strong></p><strong>{heart.price*form.quantity} THB</strong><p>{heart.name} × {form.quantity}</p></div>
+ <section className="transfer-summary" aria-label="สรุปการโอนเงิน">
+  <div className="transfer-recipient"><Heart color={heart.color}/><div><span>ส่งหัวใจให้</span><h3>{form.recipient==='rose'?'โรส':'แพรว'}</h3></div></div>
+  <div className="transfer-total"><span className="transfer-label">ยอดที่ต้องโอน</span><p className="transfer-amount"><strong>{(heart.price*form.quantity).toLocaleString('en-US')}</strong><span>THB</span></p><div className="transfer-heart-line"><span className="transfer-heart-name"><Heart color={heart.color}/><span>{heart.name}</span></span><b>{form.quantity} หัวใจ</b></div></div>
+  <div className="transfer-account"><h3>บัญชีรับโอน</h3><dl><div><dt>ธนาคาร</dt><dd>{account.bankName}</dd></div><div><dt>ชื่อบัญชี</dt><dd>{account.accountName}</dd></div><div className="transfer-account-number"><dt>เลขบัญชี</dt><dd>{account.accountNumber}</dd></div></dl></div>
+ </section>
  {qr&&<section className="payment-qr"><h3>สแกน QR เพื่อโดเนทให้{form.recipient==='rose'?'โรส':'แพรว'}</h3><p>โอนยอด {heart.price*form.quantity} บาท {/*และตรวจชื่อผู้รับในแอปธนาคารให้ตรงกับบัญชีด้านบนก่อนยืนยัน*/}</p><img src={qr} alt={'QR รับโดเนทของ'+(form.recipient==='rose'?'โรส':'แพรว')} /><a href={qr} download>บันทึกภาพ QR</a><p>ชำระแล้วแนบสลิปด้านล่างเพื่อให้ตรวจสอบยอด</p></section>}
  <label>อัปโหลดสลิป PNG/JPEG ไม่เกิน 4 MB<input required type="file" accept="image/png,image/jpeg" disabled={busy} onChange={e=>{const file=e.target.files[0];id.current=crypto.randomUUID();if(file&&file.size>4*1024*1024){setError('ไฟล์ต้องไม่เกิน 4 MB');setSlip(null);return;}setError('');setSlip(file);}}/></label>
  <p>ต้องรอแอดมินตรวจสอบรายการ</p>

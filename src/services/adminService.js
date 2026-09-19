@@ -26,3 +26,5 @@ export const setVerificationPolicy=body=>api('/admin/verification',{method:'POST
 export async function loginReviewer(scope,password){const session=await api('/reviewer/login',{method:'POST',body:{scope,password}});saveReviewerSession(session);}
 export async function logoutReviewer(scope){try{await api('/reviewer/logout',{method:'POST',reviewerScope:scope,body:{}});}finally{clearReviewerSession(scope);}}
 export const setReviewerPassword=(scope,password)=>api('/admin/reviewer-password',{method:'POST',body:{scope,password}});
+
+export const deleteApprovedDonation=(id,scope='all')=>api('/admin/delete',{method:'POST',reviewerScope:scope,body:{id,scope,confirmed:true,reason:'แอดมินลบรายการที่อนุมัติและคืนยอดหัวใจ'}});

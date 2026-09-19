@@ -1,5 +1,5 @@
+import {ownedOrders} from '../services/api';
 import {ShareCard} from './Collections';
-import {specialHearts} from '../data/specialHearts';
 import {useEffect,useState} from 'react';
 import Modal from './Modal';
 import {Heart} from './Artwork';
@@ -10,9 +10,9 @@ import {useCollection} from '../hooks/useCollection';
 export function MemoryDetail({donation,onClose}){
  const [memory,setMemory]=useState(()=>publicMemory(donation)),[error,setError]=useState(''),[sharing,setSharing]=useState(false);const {lastSyncedAt}=useCollection();
  useEffect(()=>{let alive=true;fetchMemories({ids:[donation.id]}).then(rows=>{if(alive){setMemory(rows[0]||null);setError('');}}).catch(()=>{if(alive)setError('ยังตรวจข้อมูลล่าสุดไม่ได้ กรุณาลองเปิดอีกครั้ง');});return()=>{alive=false;};},[donation.id,lastSyncedAt]);
- const h=heartTypes.find(h=>h.id===memory?.heartType);
- if(sharing&&memory)return <ShareCard donation={memory} onClose={()=>setSharing(false)} backLabel="Heart Memory"/>;
- return <Modal title="Heart Memory" onClose={onClose}>{memory?<article className={'heart-memory-card memory-'+h.id} style={{'--memory-color':h.color}}><span className="memory-stars" aria-hidden="true">✧　✦　✧</span><Heart color={h.color}/><h3>{h.name}</h3><p>{h.meaning}</p><span className="eyebrow">For {memory.recipient==='rose'?'Rose':'Praew'}</span><h4>From {memory.supporterName}</h4><blockquote>{memory.message||'A little heart, with love.'}</blockquote><p>{memory.quantity.toLocaleString()} hearts{Number.isFinite(memory.amount)?' · '+memory.amount.toLocaleString()+' THB':''}</p><time dateTime={memory.createdAt}>{new Date(memory.createdAt).toLocaleString('th-TH')}</time>{specialHearts.filter(h=>memory.memoryMilestones.includes(h.unlock)).map(h=><p key={h.id} className="memory-milestone" style={{color:h.color}}>✦ Helped discover {h.name}</p>)}<small>Heart Memory #{memory.id}</small><button className="secondary" onClick={()=>setSharing(true)}>Share / Download this memory</button></article>:<p className="empty">ความทรงจำนี้ไม่พร้อมแสดงแล้ว</p>}{error&&<p role="status">{error}</p>}</Modal>;
+ const h=heartTypes.find(h=>h.id===memory?.heartType);const canDownload=!!memory&&ownedOrders().includes(memory.id);
+ if(sharing&&memory&&canDownload)return <ShareCard donation={memory} onClose={()=>setSharing(false)} backLabel="Heart Memory"/>;
+ return <Modal title="Heart Memory" onClose={onClose}>{memory?<article className={'heart-memory-card memory-'+h.id} style={{'--memory-color':h.color}}><Heart color={h.color}/><h3>{h.name} × {memory.quantity.toLocaleString()}</h3><h4>{memory.anonymous?'ไม่ระบุชื่อ':memory.supporterName}</h4>{!memory.anonymous&&memory.socialUsername&&<p>{memory.socialUsername}</p>}{memory.message&&<blockquote style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{memory.message}</blockquote>}{canDownload&&<button className="secondary" onClick={()=>setSharing(true)}>Share / Download this memory</button>}</article>:<p className="empty">ความทรงจำนี้ไม่พร้อมแสดงแล้ว</p>}{error&&<p role="status">{error}</p>}</Modal>;
 }
 export function MemoryExplorer({initialSearch='',ids=null}){
  const {lastSyncedAt}=useCollection();const [recipient,setRecipient]=useState(''),[type,setType]=useState(''),[search,setSearch]=useState(initialSearch),[oldest,setOldest]=useState(false),[rows,setRows]=useState([]),[selected,setSelected]=useState(null),[loading,setLoading]=useState(false),[error,setError]=useState(''),[cursor,setCursor]=useState(null),[more,setMore]=useState(false),[pages,setPages]=useState([]),[retry,setRetry]=useState(0);

@@ -7,5 +7,7 @@ import './styles/thai-font.css';
 import './styles/index.css';
 import './styles/hatching-page.css';
 import './styles/theme.css';
+import './styles/items.css';
+import './styles/admin-donations.css';
 applyTheme(readTheme());
 createRoot(document.getElementById('root')).render(<React.StrictMode><ThemeProvider><App/></ThemeProvider></React.StrictMode>);

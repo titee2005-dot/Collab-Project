@@ -18,6 +18,7 @@ async function setup(){
  const db=new PGlite();
  await db.exec("create role anon; create role authenticated; create role service_role; create schema auth; create table auth.users(id uuid primary key,email text); create schema storage; create table storage.objects(id text,bucket_id text); alter table storage.objects enable row level security; create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);");
  await db.exec(migration);await db.exec(accessMigration);await db.exec(sessionMigration);
+ for(const file of ['202609100005_collection_realtime.sql','202609100006_heart_memories.sql','202609190008_admin_donation_management.sql'])await db.exec(await readFile(new URL('../supabase/migrations/'+file,import.meta.url),'utf8'));
  await db.query('insert into auth.users(id) values ($1),($2)',[admin,outsider]);
  const rpc=async(action,payload={},actor=null)=>(await db.query('select public.heart_api($1,$2::jsonb,$3::uuid) as result',[action,JSON.stringify(payload),actor])).rows[0].result;
  const configure=async()=>{await db.query("insert into heart_private.admins(user_id,role,scope) values ($1,\'owner\',\'all\') on conflict do nothing",[admin]);await db.query("update heart_private.settings set data=jsonb_set(jsonb_set(data,'{accounts}',$1::jsonb),'{receivingEnabled}','true')",[JSON.stringify(accounts)]);};
@@ -192,6 +193,12 @@ test('Edge Function requests use real PostgreSQL transactions with mocked Auth, 
   assert.ok(order.audit.some(a=>a.actor?.startsWith('reviewer:rose:')));
   assert.equal((await request('/admin/state?scope=praew',{reviewerToken:all.token})).status,200);
   const settings=await (await request('/admin/settings',{token:'admin-token'})).json();assert.deepEqual(settings.reviewerPasswords,{rose:true,praew:true,all:true});assert.ok(!JSON.stringify(settings).includes('passwordHash'));
+  const optional={id:randomUUID(),scope:'rose',form:{...form,verified:true,paidAmount:60}};
+  const optionalResult=await request('/admin/external',{method:'POST',reviewerToken:rose.token,body:optional});assert.equal(optionalResult.status,200);assert.equal((await optionalResult.json()).paidAt,undefined);
+  assert.equal((await request('/admin/delete',{method:'POST',body:{id,confirmed:true}})).status,401);
+  const removal=await request('/admin/delete',{method:'POST',reviewerToken:rose.token,body:{id,scope:'rose',confirmed:true}});assert.equal(removal.status,200);assert.equal((await removal.json()).status,'deleted');
+  const simpleId=randomUUID();await request('/orders',{method:'POST',body:upload(simpleId)});
+  const simple=await request('/admin/review',{method:'POST',reviewerToken:rose.token,body:{id:simpleId,scope:'rose',decision:'approve',reviewMethod:'manual',confirmed:true}});assert.equal(simple.status,200);assert.equal((await simple.json()).status,'approved');
   await setPassword('rose','replacement-password');assert.equal((await request('/admin/state',{reviewerToken:rose.token})).status,401);
   assert.equal((await signIn('rose')).status,401);
   await db.query("update heart_private.reviewer_sessions set expires_at=now()-interval '1 second' where token_hash=$1",[await digest(all.token)]);
@@ -202,4 +209,37 @@ test('Edge Function requests use real PostgreSQL transactions with mocked Auth, 
   assert.equal((await request('/admin/settings',{token:'outsider-token'})).status,403);
   for(const role of ['anon','authenticated','service_role']){await db.exec('set role '+role);try{await assert.rejects(db.query("select heart_private.heart_api_base('state','{}',$1)",[admin]));}finally{await db.exec('reset role');}}
  });
+});
+
+
+test('manual review, optional external metadata, and scoped audited deletion update public totals atomically',async t=>{
+ const {db,rpc,configure}=await setup();t.after(()=>db.close());await configure();
+ const prepare=async(recipient='rose')=>{const p={id:randomUUID(),form:{...form,recipient},slipHash:await digest(png()),fingerprint:randomUUID()};await rpc('prepare',p);await rpc('ready',{id:p.id,fingerprint:p.fingerprint});return p;};
+ const manual=id=>({id,decision:'approve',reviewMethod:'manual',confirmed:true});
+ const o=await prepare();await assert.rejects(rpc('review',manual(o.id),outsider));await assert.rejects(rpc('review',{...manual(o.id),confirmed:false},admin));
+ assert.equal((await rpc('review',manual(o.id),admin)).status,'approved');
+ const ext={id:randomUUID(),fingerprint:randomUUID(),form:{...form,recipient:'praew'},verified:true,paidAmount:60};
+ const saved=await rpc('external',ext,admin);assert.equal(saved.status,'approved');assert.equal(saved.paidAt,undefined);assert.equal(saved.externalRef,undefined);
+ await rpc('external',ext,admin);assert.equal((await rpc('donations')).length,2);
+ await db.query("insert into heart_private.admins(user_id,role,scope) values ($1,'reviewer','rose')",[outsider]);
+ const del=id=>({id,confirmed:true,scope:'rose'});
+ await assert.rejects(rpc('delete',del(ext.id),outsider),/สิทธิ์/);await assert.rejects(rpc('delete',del(o.id)),/สิทธิ์|แอดมิน/);
+ const pending=await prepare();await assert.rejects(rpc('delete',del(pending.id),admin),/อนุมัติ/);
+ const tokenHash='a'.repeat(64);await rpc('reviewer_password',{scope:'rose',salt:'b'.repeat(32),passwordHash:'c'.repeat(64)},admin);await rpc('reviewer_session_create',{scope:'rose',version:1,tokenHash});
+ await assert.rejects(rpc('delete',{...del(ext.id),reviewerHash:tokenHash}),/สิทธิ์/);
+ await assert.rejects(rpc('delete',{...del(o.id),confirmed:false,reviewerHash:tokenHash}),/ยืนยัน/);
+ await db.exec("create function heart_private.fail_delete() returns trigger language plpgsql as $$ begin raise exception 'test rollback'; end; $$; create trigger fail_delete before delete on heart_private.donations for each row execute function heart_private.fail_delete();");
+ await assert.rejects(rpc('delete',{...del(o.id),reviewerHash:tokenHash}),/rollback/);
+ assert.equal((await rpc('state',{},admin)).orders.find(x=>x.id===o.id).status,'approved');assert.equal((await rpc('donations')).length,2);
+ await db.exec('drop trigger fail_delete on heart_private.donations');
+ const stamp=(await db.query('select approved_at from public.heart_collection_events where id=$1',[o.id])).rows[0].approved_at;
+ const deleted=await rpc('delete',{...del(o.id),reviewerHash:tokenHash});assert.equal(deleted.status,'deleted');assert.ok(deleted.audit.at(-1).actor.startsWith('reviewer:rose:'));
+ assert.equal((await rpc('delete',{...del(o.id),reviewerHash:tokenHash})).audit.length,deleted.audit.length);
+ await rpc('review',manual(o.id),admin);await rpc('verificationResult',{id:o.id,result:{status:'verified',ref:'LATE-001',reason:'Late result'}});
+ assert.equal((await rpc('prepare',o)).status,'deleted');await assert.rejects(rpc('prepare',{...o,id:randomUUID()}));
+ assert.ok(new Date((await db.query('select approved_at from public.heart_collection_events where id=$1',[o.id])).rows[0].approved_at)>new Date(stamp));
+ await db.exec('set role anon');
+ const world=(await db.query('select public.heart_world() as data')).rows[0].data;assert.equal(world.groups.reduce((n,g)=>n+g.quantity,0),3);assert.ok(world.groups.every(g=>g.recipient==='praew'));assert.ok(!world.donations.some(d=>d.id===o.id));
+ assert.deepEqual((await db.query('select public.heart_memories(p_ids=>$1::uuid[]) as data',[[o.id]])).rows[0].data,[]);
+ await db.exec('reset role');await rpc('delete',{id:ext.id,confirmed:true},admin);await rpc('external',ext,admin);assert.equal((await rpc('donations')).length,0);
 });

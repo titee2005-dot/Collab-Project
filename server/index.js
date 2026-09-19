@@ -32,6 +32,7 @@ export function createApp({config=configuration(),store,verify}={}) {
         if(path==='/api/admin/verification' && req.method==='POST')return json(200,store.setVerificationPolicy(await readJson()));
         if(path==='/api/admin/mode' && req.method==='POST'){const b=await readJson();store.setMode(b.recipient,b.mode);return json(200,{ok:true});}
         if(path==='/api/admin/review' && req.method==='POST'){const b=await readJson();return json(200,store.review(b.id,b));}
+        if(path==='/api/admin/delete' && req.method==='POST'){const b=await readJson();return json(200,store.deleteApproved(b.id,b));}
         if(path==='/api/admin/external' && req.method==='POST'){const b=await readJson();return json(200,await store.submit({id:b.id,form:b.form},null,verify,{...b.form,reason:b.reason}));}
         if(path.startsWith('/api/admin/slips/') && req.method==='GET'){const row=store.slip(path.split('/').pop());if(!row?.slip)return json(404,{error:'ไม่พบสลิป'});res.setHeader('Content-Type',row.mime);res.setHeader('Content-Disposition','inline; filename="slip"');res.end(Buffer.from(row.slip));return;}
         return json(404,{error:'ไม่พบ API'});

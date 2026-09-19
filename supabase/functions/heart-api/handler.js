@@ -101,9 +101,10 @@ export function createHandler({db,env,verify=verifySlip}){
    if(path==='/admin/mode'&&req.method==='POST')return json(await rpc('mode',await readJSON(),actor));
    if(path==='/admin/verification'&&req.method==='POST')return json(await rpc('policy',await readJSON(),actor));
    if(path==='/admin/review'&&req.method==='POST'){const b=await readJSON();if(b.decision==='approve')await ready();return json(await rpc('review',b,actor));}
+   if(path==='/admin/delete'&&req.method==='POST')return json(await rpc('delete',await readJSON(),actor));
    if(path==='/admin/external'&&req.method==='POST'){
     await ready();const b=await readJSON(),form=cleanForm(b.form);
-    const payload={id:b.id,form,verified:b.form.verified,paidAmount:b.form.paidAmount,channel:'Other',externalRef:normalizeRef(b.form.externalRef),paidAt:b.form.paidAt,reason:'แอดมินยืนยันยอดเข้าบัญชีจากรายการภายนอก',scope:b.scope};
+    const payload={id:b.id,form,verified:b.form.verified,paidAmount:b.form.paidAmount,channel:'Other',...(b.form.externalRef?{externalRef:normalizeRef(b.form.externalRef)}:{}),...(b.form.paidAt?{paidAt:b.form.paidAt}:{}),reason:'แอดมินยืนยันยอดเข้าบัญชีจากรายการภายนอก',scope:b.scope};
     payload.fingerprint=await digest(JSON.stringify(payload));
     return json(await rpc('external',payload,actor));
    }
