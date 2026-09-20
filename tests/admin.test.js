@@ -34,7 +34,7 @@ test('manual queue, mode snapshot, evidence validation and idempotent credit',as
  const approved=s.review(o.id,evidence(o));assert.equal(approved.status,'approved');s.review(o.id,evidence(o));
  assert.equal(s.publicDonations().length,1);assert.equal(s.publicDonations()[0].amount,60);assert.equal(s.get(o.id).audit.at(-1).actor,'admin');
 });
-test('rejection is terminal',async t=>{const s=setup(t);const o=await s.submit({id:randomUUID(),form},png());s.review(o.id,{decision:'reject',reason:'Wrong slip'});s.review(o.id,evidence(o));assert.equal(s.publicDonations().length,0);});
+test('rejected orders require fresh valid evidence before approval',async t=>{const s=setup(t);const o=await s.submit({id:randomUUID(),form},png());s.review(o.id,{decision:'reject',reason:'Wrong slip'});assert.throws(()=>s.review(o.id,{...evidence(o),confirmed:false}));assert.equal(s.publicDonations().length,0);s.review(o.id,evidence(o));assert.equal(s.publicDonations().length,1);});
 test('auto verifier credits once during concurrent identical requests',async t=>{
  const s=setup(t);s.setMode('rose','auto');const input={id:randomUUID(),form},bytes=png();let calls=0;
  await Promise.all([s.submit(input,bytes,async()=>{calls++;await new Promise(r=>setTimeout(r,10));return {status:'verified',ref:'AUTO-001',reason:'test'};}),s.submit(input,bytes,verified())]);
@@ -204,4 +204,12 @@ test('external payment can omit bank time/reference and remain idempotent',async
  const o=await s.submit(input,null,undefined,ext);assert.equal(o.status,'approved');assert.equal(o.paidAt,undefined);assert.equal(o.externalRef,undefined);
  await s.submit(input,null,undefined,ext);assert.equal(s.publicDonations().length,1);
  s.deleteApproved(o.id,{confirmed:true});await s.submit(input,null,undefined,ext);assert.equal(s.publicDonations().length,0);
+});
+
+test('rejected local orders can be approved once or deleted without subtracting credit',async t=>{
+ const s=setup(t),a=await s.submit({id:randomUUID(),form},png()),b=await s.submit({id:randomUUID(),form},png());
+ for(const o of [a,b])s.review(o.id,{decision:'reject',reason:'Rejected'});
+ const approve={decision:'approve',reviewMethod:'manual',confirmed:true,reason:'Rechecked'};
+ assert.equal(s.review(a.id,approve).status,'approved');s.review(a.id,approve);assert.equal(s.publicDonations().length,1);
+ assert.equal(s.deleteApproved(b.id,{confirmed:true,scope:'rose'}).status,'deleted');s.deleteApproved(b.id,{confirmed:true,scope:'rose'});s.review(b.id,approve);assert.equal(s.publicDonations().length,1);
 });

@@ -20,14 +20,16 @@ export function PersonalBook({onClose}) {
  if(selected)return <ShareCard donation={selected} onClose={()=>setSelected(null)} backLabel="Back to My Memories"/>;
  const shown=history.filter(d=>filter==='all'||d.recipient===filter);
  return <Modal wide title="My little book of memories" onClose={onClose}>
-  <p className="muted">Your hearts, your words, your little moments. Saved on this device, including anonymous gifts.</p>
+  <div className="personal-book">
   {ownError&&<p role="status">{ownError}</p>}{own===null&&!ownError&&<p role="status">กำลังเปิดประวัติส่วนตัว…</p>}
   <div className="memory-summary"><BookHeart size={29}/><span><b>{hearts} hearts sent with love</b><small>{history.length} saved {history.length===1?'story':'stories'} · Every card is yours to keep.</small></span></div>
-  <section className="memory-badges" aria-label="Memory badges">{badges.length?badges.map(b=><article key={b.id}><Sparkles size={22}/><h3>{b.name}</h3><p>{b.description}</p><time dateTime={b.createdAt}>{new Date(b.createdAt).toLocaleDateString()}</time>{b.at&&<button className="text-button" onClick={()=>{onClose();replayCelebration(b.at);}}>Relive this moment</button>}</article>):<p className="memory-empty">Your first heart will start your story and earn your first memory badge.</p>}</section>
+  {/* Memory badges are temporarily hidden. */}
+  {false && <section className="memory-badges" aria-label="Memory badges">{badges.length?badges.map(b=><article key={b.id}><Sparkles size={22}/><h3>{b.name}</h3><p>{b.description}</p><time dateTime={b.createdAt}>{new Date(b.createdAt).toLocaleDateString()}</time>{b.at&&<button className="text-button" onClick={()=>{onClose();replayCelebration(b.at);}}>Relive this moment</button>}</article>):<p className="memory-empty">Your first heart will start your story and earn your first memory badge.</p>}</section>}
   <div className="tabs">{['all','rose','praew'].map(f=><button key={f} aria-pressed={filter===f} className={filter===f?'active':''} onClick={()=>setFilter(f)}>{f==='all'?'All my stories':f==='rose'?'For Rose':'For Praew'}</button>)}</div>
-  <div className="memory-stories">{shown.slice(0,24).map(d=>{const h=heartTypes.find(h=>h.id===d.heartType);return <button key={d.id} onClick={()=>setSelected(d)} className="memory-story"><Heart color={h.color}/><span><b>{h.name} × {d.quantity} · for {d.recipient==='rose'?'Rose':'Praew'}</b><span>“{d.message||'A little heart, with love.'}”</span><small>{d.supporterName} · {new Date(d.createdAt).toLocaleString()}</small></span><ArrowUpRight size={18}/></button>;})}{!shown.length&&<p className="memory-empty">No stories here yet. Every little heart has a place in this book.</p>}</div>
-  <details><summary>All my approved Heart Memories</summary><MemoryExplorer ids={ownedOrders()}/></details>
-  <p className="fine-print">Open any story to read it and download its card again. This book shows orders bookmarked on this browser, not a signed-in account.</p>
+  <div className="memory-stories">{shown.slice(0,24).map(d=>{const h=heartTypes.find(h=>h.id===d.heartType);return <button key={d.id} onClick={()=>setSelected(d)} className="memory-story"><Heart color={h.color}/><span><b>{h.name} × {d.quantity}</b>{d.message&&<span style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{d.message}</span>}<small>{d.anonymous?'ไม่ระบุชื่อ':d.supporterName} · {new Date(d.createdAt).toLocaleString('th-TH')}</small></span><ArrowUpRight size={18}/></button>;})}{!shown.length&&<p className="memory-empty">No stories here yet. Every little heart has a place in this book.</p>}</div>
+  <details className="personal-book-all"><summary>All my approved Heart Memories</summary><div className="personal-book-explorer"><MemoryExplorer ids={ownedOrders()}/></div></details>
+  <p className="fine-print personal-book-help">กดที่การ์ดเพื่ออ่านข้อความและดาวน์โหลดภาพได้อีกครั้ง ประวัตินี้บันทึกไว้ในเบราว์เซอร์ที่คุณใช้ส่งหัวใจ ไม่ได้ผูกกับบัญชีผู้ใช้</p>
+  </div>
  </Modal>;
 }
 

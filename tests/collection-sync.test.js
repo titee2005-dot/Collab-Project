@@ -10,3 +10,12 @@ test('disposed requests do not publish and malformed data never replaces valid c
 test('relative labels use local time only',()=>{assert.equal(relativeSyncTime(null,10000),'ตรวจหัวใจล่าสุด');assert.equal(relativeSyncTime(10000,18000),'อัปเดตเมื่อสักครู่');assert.equal(relativeSyncTime(10000,22000),'อัปเดต 12 วินาทีที่แล้ว');assert.equal(relativeSyncTime(10000,130000),'อัปเดต 2 นาทีที่แล้ว');});
 
 test('a concurrent approval already present in a live snapshot is not lost before its event arrives',async()=>{const h=harness();h.setData([{...donation('a'),createdAt:'2026-09-09T10:00:00Z'}]);await h.sync.refresh('initial');h.setData([{...donation('a'),createdAt:'2026-09-09T10:00:00Z'},{...donation('b'),createdAt:'2026-09-09T10:00:01Z'},{...donation('c'),createdAt:'2026-09-09T10:00:02Z'}]);await h.sync.live('b');assert.deepEqual(h.updates.at(-1).meta.liveDonations.map(d=>d.id),['b','c']);const n=h.calls();await h.sync.live('c');assert.equal(h.calls(),n);});
+
+for(const initiallyEmpty of [false,true])test(`same-time batch approvals all enter the live queue (empty=${initiallyEmpty})`,async()=>{
+ const h=harness(),stamp='2026-09-21T10:00:00Z';
+ const old={...donation('old'),approvedAt:stamp};h.setData(initiallyEmpty?[]:[old]);await h.sync.refresh('initial');
+ const batch=Array.from({length:12},(_,i)=>({...donation('new-'+i,i===0?100:1),approvedAt:stamp}));
+ h.setData([...(initiallyEmpty?[]:[old]),...batch]);await h.sync.live('new-0');
+ assert.deepEqual(h.updates.at(-1).meta.liveDonations.map(d=>d.id),batch.map(d=>d.id));
+ const calls=h.calls();await h.sync.live('new-11');assert.equal(h.calls(),calls);
+});

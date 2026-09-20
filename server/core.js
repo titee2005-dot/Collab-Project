@@ -116,15 +116,16 @@ export function openStore(path, config) {
       try {transaction(()=>{const current=get(o.id);if(current.status!=='pending') return;current.audit.push(event('verification','EasySlip',result.reason));current.verification=result.status;current.externalRef=result.ref;current.paidAt=result.paidAt;if(result.status==='verified') credit(current,'EasySlip',result.reason);else {current.status=result.status==='rejected'?'rejected':'pending';save(current);}});} catch(e) {if(e.status!==409)throw e;transaction(()=>{const current=get(o.id);if(current.status!=='pending')return;current.status='rejected';current.audit.push(event('rejected','system','เลขอ้างอิงถูกใช้แล้ว'));save(current);});}
       return get(o.id);
     },
-    review(id,input) {return transaction(()=>{const o=get(id);if(!o) fail('ไม่พบรายการ',404);if(!['approve','reject'].includes(input.decision)) fail('คำสั่งไม่ถูกต้อง');if(typeof input.reason!=='string'||!input.reason.trim()||input.reason.length>200)fail('กรอกเหตุผล ไม่เกิน 200 ตัวอักษร');if(o.status!=='pending')return o;
+    review(id,input) {return transaction(()=>{const o=get(id);if(!o) fail('ไม่พบรายการ',404);if(!['approve','reject'].includes(input.decision)) fail('คำสั่งไม่ถูกต้อง');if(typeof input.reason!=='string'||!input.reason.trim()||input.reason.length>200)fail('กรอกเหตุผล ไม่เกิน 200 ตัวอักษร');if(o.status!=='pending'&&!(o.status==='rejected'&&input.decision==='approve'))return o;
       if(input.decision==='approve'){requireReady();if(input.reviewMethod==='manual'){if(input.confirmed!==true||!o.hasSlip)fail('ต้องยืนยันการตรวจภาพและยอดเงินจริง');o.reviewMethod='manual';credit(o,config.username,input.reason);return o;}if(input.confirmed!==true||input.paidAmount!==o.amount||input.accountNumber!==o.account.accountNumber||input.bankCode!==o.account.bankCode)fail('ต้องยืนยันยอดเงินและบัญชีปลายทางจากธนาคาร');const ref=normalizeRef(input.externalRef);if(o.externalRef&&o.externalRef!==ref)fail('เลขอ้างอิงไม่ตรงกับผลตรวจ');const date=Date.parse(input.paidAt);if(!Number.isFinite(date)||date>Date.now()+300000)fail('วันเวลาโอนไม่ถูกต้อง');o.externalRef=ref;o.paidAt=new Date(date).toISOString();credit(o,config.username,input.reason);}else{o.status='rejected';o.audit.push(event('rejected',config.username,input.reason));save(o);}return o;});},
     deleteApproved(id,input) {return transaction(()=>{
       const o=get(id);if(!o)fail('ไม่พบรายการ',404);
       if(input.confirmed!==true)fail('กรุณายืนยันการลบหัวใจ');
       const scope=input.scope??'all';if(!['rose','praew','all'].includes(scope)||(scope!=='all'&&o.form.recipient!==scope))fail('ไม่มีสิทธิ์เข้าถึงรายการนี้',403);
-      if(o.status==='deleted')return o;if(o.status!=='approved')fail('ลบได้เฉพาะรายการที่อนุมัติแล้ว',409);
+      if(o.status==='deleted')return o;if(!['approved','rejected'].includes(o.status))fail('ลบได้เฉพาะรายการที่อนุมัติหรือปฏิเสธแล้ว',409);
       db.prepare('DELETE FROM donations WHERE id=?').run(id);
-      o.status='deleted';o.deletedAt=new Date().toISOString();o.audit.push(event('deleted',config.username,'แอดมินลบรายการที่อนุมัติและคืนยอดหัวใจ'));save(o);return o;
+      const deleteReason=o.status==='rejected'?'แอดมินลบรายการที่ปฏิเสธ':'แอดมินลบรายการที่อนุมัติและคืนยอดหัวใจ';
+      o.status='deleted';o.deletedAt=new Date().toISOString();o.audit.push(event('deleted',config.username,deleteReason));save(o);return o;
     });},
     slip(id) {return db.prepare('SELECT slip,mime FROM orders WHERE id=?').get(id);}
   };

@@ -18,7 +18,7 @@ export function createCollectionSync({fetchData,onData,onState,now=Date.now}){
    if(!Array.isArray(data)||data.some(d=>!d||typeof d.id!=='string'||!['rose','praew'].includes(d.recipient)||!Number.isInteger(d.quantity)||d.quantity<1||!['pink','ruby','amber','golden'].includes(d.heartType)))throw Error('Invalid approved collection');
    const latestStamp=current?Math.max(0,...current.map(d=>Date.parse(d.approvedAt||d.createdAt)||0)):0;
    // A snapshot may include another fresh approval before its websocket message arrives.
-   const liveDonations=current?data.filter(d=>ids.has(d.id)||(cause==='live'&&latestStamp>0&&!current.some(p=>p.id===d.id)&&Date.parse(d.approvedAt||d.createdAt)>latestStamp)):[];
+   const liveDonations=current?data.filter(d=>ids.has(d.id)||(cause==='live'&&!current.some(p=>p.id===d.id)&&Date.parse(d.approvedAt||d.createdAt)>=latestStamp)):[];
    current=data;for(const id of ids)liveQueue.delete(id);if(cause!=='live')for(const id of existingQueue)if(data.some(d=>d.id===id))liveQueue.delete(id);
    lastSyncedAt=now();initialError='';syncError='';if(cause==='manual')manualState='success';
    onData(data,{cause,liveDonations});return true;

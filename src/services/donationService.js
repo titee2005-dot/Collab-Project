@@ -6,8 +6,11 @@ let cache=[];
 export const getDonations=()=>cache;
 export async function refreshDonations(ids=[]){
  if(backend==='local'){const data=await api('/donations');cache=data.map(publicMemory).filter(Boolean);return cache;}
- const {data,error}=await getSupabase().rpc('heart_world',{p_ids:ids.slice(0,100)});if(error)throw error;
- const rows=data.donations.map(publicMemory).filter(Boolean);rows.collectionStats=getCollectionStats(data.groups);cache=rows;return rows;
+ const uniqueIds=[...new Set(ids)],batches=[];
+ for(let i=0;i<Math.max(1,uniqueIds.length);i+=100)batches.push(uniqueIds.slice(i,i+100));
+ const snapshots=await Promise.all(batches.map(async p_ids=>{const {data,error}=await getSupabase().rpc('heart_world',{p_ids});if(error)throw error;return data;}));
+ const merged=new Map();for(const snapshot of snapshots)for(const d of snapshot.donations){const memory=publicMemory(d);if(memory)merged.set(memory.id,memory);}
+ const rows=[...merged.values()].sort((a,b)=>a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id));rows.collectionStats=getCollectionStats(snapshots.at(-1).groups);cache=rows;return rows;
 }
 export async function fetchMemories({recipient=null,type=null,search='',oldest=false,cursor=null,ids=null}={}){
  if(backend==='local'){const data=(await api('/donations')).map(publicMemory).filter(Boolean).filter(d=>(!recipient||d.recipient===recipient)&&(!type||d.heartType===type)&&(!ids||ids.includes(d.id))&&(!search||!d.anonymous&&d.supporterName.toLowerCase().includes(search.toLowerCase())||d.id===search)).sort((a,b)=>(a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id))*(oldest?1:-1));return data.filter(d=>!cursor||((d.createdAt.localeCompare(cursor.stamp)||d.id.localeCompare(cursor.id))*(oldest?1:-1)>0)).slice(0,24);}

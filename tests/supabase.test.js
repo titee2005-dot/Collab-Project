@@ -18,7 +18,7 @@ async function setup(){
  const db=new PGlite();
  await db.exec("create role anon; create role authenticated; create role service_role; create schema auth; create table auth.users(id uuid primary key,email text); create schema storage; create table storage.objects(id text,bucket_id text); alter table storage.objects enable row level security; create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);");
  await db.exec(migration);await db.exec(accessMigration);await db.exec(sessionMigration);
- for(const file of ['202609100005_collection_realtime.sql','202609100006_heart_memories.sql','202609190008_admin_donation_management.sql'])await db.exec(await readFile(new URL('../supabase/migrations/'+file,import.meta.url),'utf8'));
+ for(const file of ['202609100005_collection_realtime.sql','202609100006_heart_memories.sql','202609190008_admin_donation_management.sql','202609210009_reconsider_rejected_orders.sql'])await db.exec(await readFile(new URL('../supabase/migrations/'+file,import.meta.url),'utf8'));
  await db.query('insert into auth.users(id) values ($1),($2)',[admin,outsider]);
  const rpc=async(action,payload={},actor=null)=>(await db.query('select public.heart_api($1,$2::jsonb,$3::uuid) as result',[action,JSON.stringify(payload),actor])).rows[0].result;
  const configure=async()=>{await db.query("insert into heart_private.admins(user_id,role,scope) values ($1,\'owner\',\'all\') on conflict do nothing",[admin]);await db.query("update heart_private.settings set data=jsonb_set(jsonb_set(data,'{accounts}',$1::jsonb),'{receivingEnabled}','true')",[JSON.stringify(accounts)]);};
@@ -242,4 +242,17 @@ test('manual review, optional external metadata, and scoped audited deletion upd
  const world=(await db.query('select public.heart_world() as data')).rows[0].data;assert.equal(world.groups.reduce((n,g)=>n+g.quantity,0),3);assert.ok(world.groups.every(g=>g.recipient==='praew'));assert.ok(!world.donations.some(d=>d.id===o.id));
  assert.deepEqual((await db.query('select public.heart_memories(p_ids=>$1::uuid[]) as data',[[o.id]])).rows[0].data,[]);
  await db.exec('reset role');await rpc('delete',{id:ext.id,confirmed:true},admin);await rpc('external',ext,admin);assert.equal((await rpc('donations')).length,0);
+});
+
+test('rejected submissions can be manually approved once or deleted without credit',async t=>{
+ const {db,rpc,configure}=await setup();t.after(()=>db.close());await configure();
+ const rejected=async()=>{const p={id:randomUUID(),form,slipHash:await digest(png()),fingerprint:randomUUID()};await rpc('prepare',p);await rpc('ready',{id:p.id,fingerprint:p.fingerprint});await rpc('review',{id:p.id,decision:'reject'},admin);return p;};
+ const a=await rejected(),b=await rejected();
+ await rpc('verificationResult',{id:a.id,result:{status:'verified',ref:'LATE-REJECTED',reason:'late'}});assert.equal((await rpc('donations')).length,0);
+ await assert.rejects(rpc('review',{id:a.id,decision:'approve',reviewMethod:'manual',confirmed:true},outsider));
+ const approve={id:a.id,decision:'approve',reviewMethod:'manual',confirmed:true};
+ assert.equal((await rpc('review',approve,admin)).status,'approved');await rpc('review',approve,admin);assert.equal((await rpc('donations')).length,1);
+ assert.equal((await rpc('delete',{id:b.id,confirmed:true},admin)).status,'deleted');await rpc('delete',{id:b.id,confirmed:true},admin);
+ await rpc('review',{...approve,id:b.id},admin);assert.equal((await rpc('donations')).length,1);
+ const state=await rpc('state',{},admin);assert.equal(state.orders.find(o=>o.id===b.id).status,'deleted');
 });

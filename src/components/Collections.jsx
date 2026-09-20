@@ -1,3 +1,4 @@
+import '../styles/memory-cards.css';
 import {ownedOrders} from '../services/api';
 import ItemArtwork from './ItemArtwork';
 import {MemoryExplorer} from './HeartMemories';
@@ -17,21 +18,46 @@ export function CollectionBook({onClose}){
  {tab==='memories'?<MemoryExplorer/>:tab==='hearts'?<div className="book-grid">{heartTypes.map(h=><article key={h.id}><Heart color={h.color}/><h3>{h.name}</h3><p>{h.meaning}</p><span>{stats.rose.types[h.id]+stats.praew.types[h.id]} collected</span></article>)}{specialHearts.map(h=>{const open=stats.total>=h.unlock;return <article className={open?'discovered':'locked'} key={h.id}><Heart color={h.color}/>{!open&&<LockKeyhole className="lock" size={20}/>}<h3>{open?h.name:'???'}</h3><p>{open?h.meaning:`Unlock at ${h.unlock.toLocaleString()} hearts`}</p><span>{open?'Discovered together':`${Math.max(0,h.unlock-stats.total).toLocaleString()} hearts to discover`}</span></article>;})}</div>:<div className="cabinet-grid">{(tab==='shared'?milestones:collectibleItems[tab]).map((item,i)=>{const open=(tab==='shared'?stats.total:stats[tab].total)>=item.at;return <article key={item.name} className={open?'':'locked'}>{tab==='shared'?<Prop kind={item.kind||['wand','rabbit','crystal','book','crown'][i]}/>:<ItemArtwork item={item}/>}<div><h3>{item.name}</h3><p>{open?'Unlocked':`Unlock at ${item.at.toLocaleString()} hearts`}</p></div>{open?<Check size={18}/>:<LockKeyhole size={16}/>}</article>;})}</div>}
  <p className="book-foot">Special hearts are shared discoveries, lovingly earned by the community.</p></Modal>
 }
-export function SearchModal({onClose}){return <Modal wide title="Find your little story" onClose={onClose}><MemoryExplorer/><p className="fine-print">ค้นหาความทรงจำที่อนุมัติแล้วด้วยชื่อแสดงหรือ Donation ID ชื่อผู้ไม่ประสงค์ออกนามจะถูกซ่อนไว้</p></Modal>;}
+export function SearchModal({onClose}){return <Modal wide title="Find your little story" onClose={onClose}><MemoryExplorer/><p className="fine-print">ค้นหาความทรงจำที่อนุมัติแล้วด้วยชื่อผู้ส่ง ชื่อผู้ไม่ประสงค์ออกนามจะถูกซ่อนไว้</p></Modal>;}
 export function RecentActivity({full=false,onAll,onStory}){
  const {donations}=useCollection();const recent=getRecentDonations(donations,full?30:4);
  return <section className={`activity ${full?'activity-full':''}`}><div className="section-heading"><h2><span className="live-dot"/>All activity</h2>{!full&&<button className="text-button" onClick={onAll}>Show all <ArrowUpRight size={14}/></button>}</div><div className="activity-list">{recent.length?recent.map(d=>{const heart=heartTypes.find(h=>h.id===d.heartType);const mins=Math.max(0,Math.floor((Date.now()-Date.parse(d.createdAt))/60000));return <article key={d.id}><button className="activity-gem" aria-label={`Read heart story from ${d.supporterName}`} onClick={()=>onStory?.(d)}><Heart color={heart.color}/></button><div><p><b>{d.supporterName}</b> <span>sent {d.recipient==='rose'?'Rose':'Praew'}</span></p><small>{d.source==='external-payment'?'External donation · ':d.source==='admin-adjustment'?'Admin gift · ':''}{d.quantity>1?`${d.quantity} × `:''}{heart.name}</small></div><time dateTime={d.createdAt}>{mins<1?'Just now':mins<60?`${mins}m ago`:mins<1440?`${Math.floor(mins/60)}h ago`:new Date(d.createdAt).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</time></article>;}):<p>Be the first to send a little heart ♡</p>}</div></section>
 }
 export function HowToPlay({onClose}){return <Modal title="A little heart goes a long way." onClose={()=>{try{localStorage.setItem('heart-collection.help-seen','true');}catch{}onClose();}}><ol className="how-list">{[['Choose Rose or Praew','Pick the collection you’d like to brighten.'],['Choose a Heart','Kindness, passion, warmth, or hope.'],['Leave a little note','A few words can hold so much love.'],['Upload your bank transfer slip','Your hearts arrive after verification or admin approval.'],['Discover magic together','New hearts and room treasures await.']].map(([title,desc],i)=><li key={title}><span>{i+1}</span><div><b>{title}</b><p>{desc}</p></div></li>)}</ol><button className="primary full" onClick={()=>{try{localStorage.setItem('heart-collection.help-seen','true');}catch{}onClose();}}>Let’s make some magic</button></Modal>}
 export function Unlock({heart,onClose,onCollection}){return <Modal title="New Heart Discovered" onClose={onClose}><div className="unlock-art"><span>✧</span><Heart color={heart.color}/><span>✧</span></div><div className="unlock-copy"><span className="eyebrow">A COMMUNITY DISCOVERY</span><h3>{heart.name}</h3><p>{heart.meaning}</p><small>Unlocked together at {heart.unlock.toLocaleString()} hearts</small></div><button className="primary full" onClick={onCollection}>View Collection</button><button className="text-button full" onClick={onClose}>Skip celebration</button></Modal>}
-function drawCard(title,subtitle,message,date){
- const c=document.createElement('canvas');c.width=1080;c.height=1080;const x=c.getContext('2d');x.fillStyle='#f5e9e4';x.fillRect(0,0,1080,1080);x.strokeStyle='#bb8a9b';x.lineWidth=2;x.strokeRect(38,38,1004,1004);x.textAlign='center';x.fillStyle='#825168';x.font='22px sans-serif';x.fillText('H E A R T  C O L L E C T I O N',540,130);x.font='180px serif';x.fillStyle='#bd688c';x.fillText('♥',540,390);x.fillStyle='#624652';x.font='44px Georgia';x.fillText(title,540,510,920);x.font='32px sans-serif';x.fillText(subtitle,540,580,920);x.font='28px Georgia';let line='',y=690;for(const word of message.split(' ')){if(x.measureText(line+word).width>850&&line){x.fillText(line.trim(),540,y);line='';y+=42;}line+=word+' ';}if(line)x.fillText(line.trim(),540,y,900);x.font='22px sans-serif';if(date){x.font='20px sans-serif';x.fillText(date,540,880);}x.fillText('Together we keep the magic growing.',540,950);return c;
+function drawCard(title,subtitle,message,date,social=''){
+ const c=document.createElement('canvas');c.width=1080;
+ const x=c.getContext('2d');x.font='28px sans-serif';
+ const lines=[];let line='';
+ for(const char of Array.from(message)){
+  if(char==='\n'){lines.push(line);line='';continue;}
+  if(line&&x.measureText(line+char).width>850){lines.push(line);line='';}
+  line+=char;
+ }
+ if(line)lines.push(line);
+ c.height=Math.max(1080,690+Math.max(0,lines.length-1)*38+180);
+ x.fillStyle='#f5e9e4';x.fillRect(0,0,c.width,c.height);
+ x.strokeStyle='#bb8a9b';x.lineWidth=2;x.strokeRect(38,38,c.width-76,c.height-76);
+ x.textAlign='center';x.fillStyle='#825168';x.font='22px sans-serif';x.fillText('H E A R T  C O L L E C T I O N',540,130);
+ x.font='180px serif';x.fillStyle='#bd688c';x.fillText('♥',540,390);
+ x.fillStyle='#624652';x.font='44px Georgia';x.fillText(title,540,510,920);
+ x.font='32px sans-serif';x.fillText(subtitle,540,580,920);
+ if(social){x.font='24px sans-serif';x.fillText(social,540,630,900);}
+ x.font='28px sans-serif';lines.forEach((text,i)=>x.fillText(text,540,690+i*38));
+ if(date){x.font='20px sans-serif';x.fillText(date,540,c.height-120);}
+ return c;
 }
+
 export function ShareCard({donation,onClose,summary,backLabel}){
  const canDownload=()=>!donation||ownedOrders().includes(donation.id);
- const [status,setStatus]=useState('');const heart=heartTypes.find(h=>h.id===donation?.heartType);const title=summary?.title||`${donation.supporterName} sent ${donation.recipient==='rose'?'Rose':'Praew'}`;const subtitle=summary?.subtitle||`${heart.name} × ${donation.quantity}`;const message=summary?.message||donation?.message||'A little heart, with love.';
- const getBlob=()=>new Promise(resolve=>drawCard(title,subtitle,message,donation?new Date(donation.createdAt).toLocaleString():null).toBlob(resolve,'image/png'));
+ const [status,setStatus]=useState('');const heart=heartTypes.find(h=>h.id===donation?.heartType);
+ const title=summary?.title||`${heart.name} × ${donation.quantity}`;
+ const subtitle=summary?.subtitle||(donation.anonymous?'ไม่ระบุชื่อ':donation.supporterName);
+ const message=summary?.message??donation?.message??'';
+ const social=donation&&!donation.anonymous?donation.socialUsername||'':'';
+ const date=donation?new Date(donation.createdAt).toLocaleString('th-TH'):null;
+ const getBlob=()=>new Promise(resolve=>drawCard(title,subtitle,message,date,social).toBlob(resolve,'image/png'));
  async function download(){if(!canDownload())return;const blob=await getBlob();if(!blob)return;const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='my-heart-collection.png';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);setStatus('Your heart card is ready.');}
  async function share(){if(!canDownload())return;try{const blob=await getBlob();const files=[new File([blob],'my-heart.png',{type:'image/png'})];if(navigator.canShare?.({files})){await navigator.share({files,title:'Heart Collection',text:`${title}. ${subtitle}`});}else if(navigator.share){await navigator.share({title:'Heart Collection',text:`${title}. ${subtitle}`});}else{await download();setStatus('Share is unavailable here. Your card has been downloaded.');}}catch(e){if(e.name!=='AbortError')setStatus('Could not share. You can download the card instead.');}}
- return <Modal title="A little memory to keep" onClose={onClose}>{backLabel&&<button className="text-button" onClick={onClose}>← {backLabel}</button>}<div className="share-preview"><span className="eyebrow">HEART COLLECTION</span><Heart color={heart?.color||'#cc91b5'}/><h3>{title}</h3><p>{subtitle}</p><blockquote>“{message}”</blockquote><small>Together we keep the magic growing.</small>{donation&&<time dateTime={donation.createdAt}>{new Date(donation.createdAt).toLocaleString()}</time>}</div>{donation&&<p className="story-receipt">Story ID: {donation.id}{donation.source==='external-payment'?' · Recorded from an external donation':donation.source==='admin-adjustment'?' · Added by admin, no payment':''}</p>}{canDownload()&&<div className="share-actions"><button className="primary" onClick={download}><Download size={16}/>Download Image</button><button className="secondary" onClick={share}><Share2 size={16}/>Share</button></div>}<p role="status" className="fine-print">{status}</p></Modal>
+ return <Modal title="Heart Memory" onClose={onClose}>{backLabel&&<button className="secondary memory-back" onClick={onClose}><span aria-hidden="true">←</span> {backLabel}</button>}<div className="share-preview memory-share-preview"><Heart color={heart?.color||'#cc91b5'}/><h3>{title}</h3><p>{subtitle}</p>{social&&<p>{social}</p>}{message&&<blockquote>{message}</blockquote>}{donation&&<time dateTime={donation.createdAt}>{date}</time>}</div>{canDownload()&&<div className="share-actions"><button className="primary" onClick={download}><Download size={16}/>Download Image</button><button className="secondary" onClick={share}><Share2 size={16}/>Share</button></div>}<p role="status" className="fine-print">{status}</p></Modal>
 }
