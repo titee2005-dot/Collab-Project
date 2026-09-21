@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {EVENT_END,eventTimeLeft} from '../src/services/eventCountdown.js';
+test('deadline is Friday 25 September 2026 23:59 in Thailand',()=>{assert.equal(new Date(EVENT_END).toISOString(),'2026-09-25T16:59:00.000Z');assert.equal(new Date(EVENT_END).getUTCDay(),5);});
+test('countdown shows days and correct rollover, ending at zero without negatives',()=>{const end=Date.parse(EVENT_END);assert.deepEqual(eventTimeLeft(end-90061000),{ended:false,days:1,hours:1,minutes:1,seconds:1});assert.equal(eventTimeLeft(end-1).seconds,1);assert.deepEqual(eventTimeLeft(end),{ended:true,days:0,hours:0,minutes:0,seconds:0});assert.deepEqual(eventTimeLeft(end+3600000),eventTimeLeft(end));});
