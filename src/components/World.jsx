@@ -1,3 +1,4 @@
+import {jarHeartCount,jarHeartPosition} from '../services/jarHearts';
 import ItemArtwork,{ItemDisplay} from './ItemArtwork';
 import {RoomEnvironment,RoomEvolutionProgress} from './RoomEvolution';
 import AnimatedCount from './AnimatedCount';
@@ -15,7 +16,7 @@ export function Progress({value,max,label}){return <div className="progress" rol
 export function Room({character,onCollect,onCabinet,active,onStory,hatched=false}){
  const {stats,arrival,notice,stories,evolution}=useCollection();const {id,name}=character,s=stats[id]; const [previewId,setPreviewId]=useState(null);const preview=collectibleItems[id].find(i=>i.id===previewId);const previewLocked=preview && preview.at>s.total;
  const next=collectibleItems[id].find(i=>i.at>s.total);
- const count=Math.min(96,Math.ceil(s.total/5));
+ const count=jarHeartCount(s.total);
  const colors=heartTypes.flatMap(h=>Array(Math.max(0,Math.round(s.types[h.id]/Math.max(1,s.total)*100))).fill(h.color));
  const latest=stories?.[id];
  return <section className={`room ${id} ${active?'mobile-active':''} ${notice?.landed&&notice?.recipient===id?'receiving':''}`} aria-label={`${name}'s collection`}>
@@ -27,7 +28,7 @@ export function Room({character,onCollect,onCabinet,active,onStory,hatched=false
    <div className="hanging left">✧</div><div className="hanging right">✧</div>
    {character.artwork&&<img className="licensed-art" src={character.artwork} alt={`${name} artwork`}/>}
    <div className="jar-wrap"><svg className="jar-glass" viewBox="0 0 300 340" aria-hidden="true"><defs><clipPath id={`jar-fill-${id}`} clipPathUnits="objectBoundingBox"><path transform="matrix(.0032 0 0 .0028235294 .02 .02)" d="M110 62Q75 80 51 126C-14 237 71 313 150 327C229 313 314 237 249 126Q225 80 190 62Z"/></clipPath><linearGradient id={`glass-${id}`} x2="1" y2=".7"><stop stopColor="#fff5ef" stopOpacity=".8"/><stop offset=".45" stopColor={id==='rose'?'#eac9df':'#f3d5bb'} stopOpacity=".22"/><stop offset="1" stopColor="#fff3e7" stopOpacity=".8"/></linearGradient></defs><path d="M110 62Q75 80 51 126C-14 237 71 313 150 327C229 313 314 237 249 126Q225 80 190 62Z" fill={`url(#glass-${id})`} stroke={id==='rose'?'#bd8ca9':'#c8a27a'} strokeWidth="2.5"/><path d="M97 89Q39 133 49 200M71 245q14 27 40 38" fill="none" stroke="#fff9ef" strokeWidth="8" strokeLinecap="round" opacity=".85"/><ellipse cx="150" cy="64" rx="46" ry="11" fill="#ead1c7" stroke="#b98b85" strokeWidth="2"/><rect x="105" y="44" width="90" height="20" rx="8" fill="#ecd5b6" stroke="#b89b76" strokeWidth="2"/><path d="M113 49H187M117 57H183" stroke="#c4a179"/><path d="M137 41q-13-20 13-29 26 9 13 29Z" fill="#ead7bb" stroke="#b89b85" strokeWidth="2"/></svg>
-    <div className="jar-fill" style={{clipPath:`url(#jar-fill-${id})`}} aria-hidden="true"><div className="jar-hearts">{Array.from({length:count},(_,i)=>{const row=Math.floor(i/9),col=i%9;return <Heart key={i} color={colors[(i*37)%colors.length]||heartTypes[i%4].color} style={{left:`${8+col*9+(row%2)*3}%`,bottom:`${4+row*6.5}%`,width:`${21+(i%4)*3}px`,transform:`rotate(${(i*29)%60-30}deg)`,animationDelay:`${-i*.39}s`}}/>;})}</div></div>
+    <div className="jar-fill" style={{clipPath:`url(#jar-fill-${id})`}} aria-hidden="true"><div className="jar-hearts">{Array.from({length:count},(_,i)=><Heart key={i} color={colors[(i*37)%colors.length]||heartTypes[i%4].color} style={jarHeartPosition(i,s.total)}/>)}</div></div>
     {latest&&<button className={`story-heart ${notice?.id===latest.id?'story-heart-new':''}`} aria-label={`Read ${latest.supporterName}'s heart story for ${name}`} onClick={()=>onStory(latest)}><Heart color={heartTypes.find(h=>h.id===latest.heartType).color}/><span>{notice?.id===latest.id?'NEW STORY':'READ STORY'}</span></button>}<div className="jar-emblem">{id==='rose'?<Moon size={19}/>:<Sun size={19}/>}</div>
    </div>
    

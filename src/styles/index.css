@@ -124,3 +124,7 @@
 
 /* Clip the pile to the glass silhouette, including moving hearts and shadows. */
 .jar-fill{position:absolute;inset:0;z-index:1;pointer-events:none}
+
+.jar-fill .jar-hearts .heart{animation:jar-heart-settle .45s ease-out both}
+@keyframes jar-heart-settle{from{translate:0 -18px;opacity:0}to{translate:0 0;opacity:1}}
+@media(prefers-reduced-motion:reduce){.jar-fill .jar-hearts .heart{animation:none}}
