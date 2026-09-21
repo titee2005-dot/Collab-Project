@@ -14,7 +14,7 @@ export default function ExternalDonationForm({actor,busy,onSave,scope='all',erro
  <form onSubmit={e=>{e.preventDefault();if(!busy&&actor?.trim()&&amountMatches&&form.verified)onSave(form,key.current);}}>
  <fieldset disabled={busy} className="external-fields">
  <div className="external-section"><h3><span>1</span> ผู้รับและผู้โดเนท</h3><div className="external-grid">
- <label>ผู้รับเงินและหัวใจ<select disabled={scope!=='all'} value={form.recipient} onChange={e=>update('recipient',e.target.value)}><option value="rose">โรส · บัญชีโรส</option><option value="praew">แพรว · บัญชีแพรว</option></select></label>
+ <label>ผู้รับเงินและหัวใจ<select disabled={scope!=='all'} value={form.recipient} onChange={e=>update('recipient',e.target.value)}><option value="rose">โรส · บัญชีบ้านโรส</option><option value="praew">แพรว · บัญชีบ้านแพรว</option></select></label>
  <label>ชื่อที่ต้องการให้แสดง<input required pattern=".*\S.*" maxLength={30} placeholder="ชื่อผู้โดเนท" value={form.supporterName} onChange={e=>update('supporterName',e.target.value)}/></label>
  </div><label className="external-message">ข้อความผู้โดเนท <small>ไม่บังคับ</small><textarea rows={2} maxLength={120} placeholder="ข้อความที่ต้องการฝากไว้" value={form.message} onChange={e=>update('message',e.target.value)}/></label></div>
  <div className="external-section"><h3><span>2</span> หัวใจและยอดโอน</h3>
