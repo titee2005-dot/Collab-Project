@@ -19,14 +19,13 @@
 [data-theme=dark] .item-display-slot .item-preview-label{background:#302735ed;color:#e8cfe0}
 @media(max-width:640px){.cabinet-grid article>.item-artwork{width:54px;height:54px}}
 
-
-
 .item-position-potion .item-artwork,.item-position-book .item-artwork{object-position:center bottom;transform:translateY(18%)}
 .room-stage:has(.item-position-book:not(:empty)) .environment-library{display:none}
 .room-stage:has(.room-familiar) .item-position-book{right:132px}
 @media(min-width:721px) and (max-width:1050px){.room-stage:has(.room-familiar) .item-position-book{right:100px}}
 
 /* A temporary bath reward, never a permanent collectible. */
-.familiar-bath-towel{position:absolute;left:32%;top:29%;width:40%;height:13%;border-radius:50% 50% 35% 35%;background:repeating-linear-gradient(0deg,#f9f0fa 0 3px,#ddd1e6 3px 4px);border:1px solid #bfa9c9;text-align:center;font-size:17px;line-height:.5;pointer-events:none;transform:rotate(-7deg)}
-.alpaca .familiar-bath-towel{top:14%;left:34%}
+.familiar-bath-towel{position:absolute;left:32%;top:25%;z-index:4;width:40%;height:auto;pointer-events:none;transform:rotate(-7deg);filter:drop-shadow(0 3px 3px #76556a24)}
+.familiar-bath-towel>.pet-bath-artwork{display:block;width:100%;height:auto}
+.alpaca .familiar-bath-towel{top:11%;left:34%;width:38%}
 .freshly-bathed .familiar-art{filter:drop-shadow(0 0 5px #f5dafa80)}

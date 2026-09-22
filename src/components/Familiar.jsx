@@ -1,6 +1,8 @@
 import {bathRewardActive} from '../services/petBath';
 import {collectibleItems} from '../data/collectibleItems';
-import {useEffect, useRef, useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
+import {PetBathArtwork} from './PetBathArtwork';
+
 export function FamiliarArt({kind='rabbit',awake=false,ribbon=false,charm=false,crown=false}) {
  const rabbit=kind==='rabbit';
  return <svg viewBox="0 0 120 135" aria-hidden="true" className="familiar-art"><ellipse cx="62" cy="124" rx="43" ry="6" fill="#a7898b" opacity=".14"/>
@@ -17,6 +19,6 @@ export default function Familiar({recipient,total,celebrating,previewCharm=false
  const rabbit=recipient==='rose',awake=greeting||celebrating;
  const fresh=bathRewardActive(bathState);
  const unlocked=kind=>collectibleItems[recipient].some(item=>item.kind===kind&&total>=item.at);
- return <div className={`room-familiar ${rabbit?'rabbit':'alpaca'} ${fresh?'freshly-bathed':''} ${awake?'is-awake':''} ${unlocked('wand')?'can-wander':''}`}><button className="familiar-button" aria-label={`Say hello to ${rabbit?'Rose’s rabbit':'Praew’s alpaca'}`} onClick={()=>{setGreeting(true);clearTimeout(timeout.current);timeout.current=setTimeout(()=>setGreeting(false),2400);}}><FamiliarArt kind={rabbit?'rabbit':'alpaca'} awake={awake} ribbon={unlocked('ribbon')} charm={unlocked('familiar-charm')||previewCharm} crown={unlocked('crown')}/><span className="familiar-thought" aria-hidden="true">{awake?'♡':'z z'}</span></button>{fresh&&<span className="familiar-bath-towel" aria-label="เพิ่งอาบน้ำเสร็จ">🫧</span>}{awake&&<span className="familiar-greeting" role="status">{celebrating?'A heart for us!':rabbit?'A little moonlit hello ♡':'A fluffy little hello ♡'}</span>}</div>;
+ return <div className={'room-familiar '+(rabbit?'rabbit':'alpaca')+' '+(fresh?'freshly-bathed ':'')+(awake?'is-awake ':'')+(unlocked('wand')?'can-wander':'')}><button className="familiar-button" aria-label={'Say hello to '+(rabbit?'Rose’s rabbit':'Praew’s alpaca')} onClick={()=>{setGreeting(true);clearTimeout(timeout.current);timeout.current=setTimeout(()=>setGreeting(false),2400);}}><FamiliarArt kind={rabbit?'rabbit':'alpaca'} awake={awake} ribbon={unlocked('ribbon')} charm={unlocked('familiar-charm')||previewCharm} crown={unlocked('crown')}/><span className="familiar-thought" aria-hidden="true">{awake?'♡':'z z'}</span></button>{fresh&&<span className="familiar-bath-towel" role="img" aria-label="เพิ่งอาบน้ำเสร็จ"><PetBathArtwork type="towel"/></span>}{awake&&<span className="familiar-greeting" role="status">{celebrating?'A heart for us!':rabbit?'A little moonlit hello ♡':'A fluffy little hello ♡'}</span>}</div>;
 }
 

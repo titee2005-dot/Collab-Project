@@ -1,4 +1,3 @@
-import {usePetBath} from './hooks/usePetBath';
 import EventCountdown from './components/EventCountdown';
 import ThemeToggle from './components/ThemeToggle';
 import {MemoryDetail} from './components/HeartMemories';
@@ -25,10 +24,9 @@ function Arrival({donation}){
  return <div ref={ref} className="arrival-heart" aria-hidden="true"><span>✧</span><div className="arrival-cluster">{Array.from({length:Math.min(donation.quantity,5)},(_,i)=><Heart key={i} color={heart.color}/>)}</div><b>+{donation.quantity.toLocaleString()}</b><span>✦</span></div>
 }
 function Experience(){
- const {rooms:bathRooms}=usePetBath();
  const [hatched,setHatched]=useState({rose:false,praew:false});
 
- const {stats,error,reload,arrival,notice,discoveries,dismissDiscovery,celebration,dismissCelebration}=useCollection();const [panel,setPanel]=useState(null),[recipient,setRecipient]=useState(null),[mobileRoom,setMobileRoom]=useState('rose'),[detail,setDetail]=useState(null);const audio=useAudio();
+ const {stats,bathRooms,error,reload,arrival,notice,discoveries,dismissDiscovery,celebration,dismissCelebration}=useCollection();const [panel,setPanel]=useState(null),[recipient,setRecipient]=useState(null),[mobileRoom,setMobileRoom]=useState('rose'),[detail,setDetail]=useState(null);const audio=useAudio();
  function collect(id){setRecipient(id);setPanel('donate');}
 
  const close=()=>setPanel(null);

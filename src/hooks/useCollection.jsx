@@ -1,3 +1,5 @@
+import {usePetBath} from './usePetBath';
+import {withBathRewards} from '../services/petBath';
 import {createStoryQueue} from '../services/storyQueue';
 import {getNewDiscoveries} from '../services/progressionService';
 import {createContext,useContext,useEffect,useRef,useState} from 'react';
@@ -10,9 +12,11 @@ import {backend,getSupabase} from '../services/supabaseClient';
 const Context=createContext(null);
 let arrivalSession;
 export function CollectionProvider({children}){
+ const {rooms:bathRooms}=usePetBath();
  const [donations,setDonations]=useState([]),[stats,setStats]=useState(()=>getCollectionStats([])),[arrival,setArrival]=useState(null),[notice,setNotice]=useState(null),[evolution,setEvolution]=useState(null),[celebration,setCelebration]=useState(null);
  const [sync,setSync]=useState({lastSyncedAt:null,isRefreshing:false,cooldownUntil:0,manualState:'idle',syncError:'',initialError:''}),[realtimeConnectionState,setConnection]=useState('connecting');
  const [stories,setStories]=useState({rose:null,praew:null});
+ const bathPoints=useRef(0);bathPoints.current=bathRooms.rose.rewardPoints+bathRooms.praew.rewardPoints;
  const reloadRef=useRef(()=>Promise.resolve(false));
  useEffect(()=>{
   let storage;try{storage=sessionStorage;}catch{}arrivalSession??=createArrivalSession(storage);
@@ -23,7 +27,7 @@ export function CollectionProvider({children}){
   function play(){
    if(disposed||running||!queue.length||document.hidden)return;running=true;const d=queue[0];setArrival(d);setNotice(d);setEvolution(null);
    const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-   timer=setTimeout(()=>{if(disposed)return;const sharedBefore=display.total;queue.shift();showStats();setArrival(null);setNotice({...d,landed:true,specials:getNewDiscoveries(sharedBefore,display.total)});
+   timer=setTimeout(()=>{if(disposed)return;const sharedBefore=display.points+bathPoints.current;queue.shift();showStats();setArrival(null);setNotice({...d,landed:true,specials:getNewDiscoveries(sharedBefore,display.points+bathPoints.current)});
     timer=setTimeout(()=>{running=false;setNotice(null);setEvolution(null);play();},1400);
    },reduced?150:1700);
   }
@@ -48,6 +52,6 @@ export function CollectionProvider({children}){
   document.addEventListener('visibilitychange',visibility);window.addEventListener('online',online);
   return()=>{disposed=true;storyQueue.dispose();coordinator.dispose();clearTimeout(timer);if(channel)db.removeChannel(channel);document.documentElement.classList.remove('world-hidden');document.removeEventListener('visibilitychange',visibility);window.removeEventListener('online',online);};
  },[]);
- return <Context.Provider value={{donations,stats,stories,error:sync.initialError,...sync,realtimeConnectionState,reload:()=>reloadRef.current(),refreshHeartCollection:()=>reloadRef.current(),arrival,notice,evolution,discoveries:[],celebration,replayCelebration:at=>setCelebration({id:'replay-'+at+'-'+Date.now(),milestones:crossedMilestones(at-1,at)}),dismissCelebration:()=>setCelebration(null),dismissDiscovery:()=>{}}}>{children}</Context.Provider>;
+ return <Context.Provider value={{donations,stats:withBathRewards(stats,bathRooms),bathRooms,stories,error:sync.initialError,...sync,realtimeConnectionState,reload:()=>reloadRef.current(),refreshHeartCollection:()=>reloadRef.current(),arrival,notice,evolution,discoveries:[],celebration,replayCelebration:at=>setCelebration({id:'replay-'+at+'-'+Date.now(),milestones:crossedMilestones(at-1,at)}),dismissCelebration:()=>setCelebration(null),dismissDiscovery:()=>{}}}>{children}</Context.Provider>;
 }
 export const useCollection=()=>useContext(Context);
