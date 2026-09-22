@@ -23,5 +23,10 @@
 
 .item-position-potion .item-artwork,.item-position-book .item-artwork{object-position:center bottom;transform:translateY(18%)}
 .room-stage:has(.item-position-book:not(:empty)) .environment-library{display:none}
-.room-stage:has(.room-familiar) .item-position-book{right:112px}
+.room-stage:has(.room-familiar) .item-position-book{right:132px}
+@media(min-width:721px) and (max-width:1050px){.room-stage:has(.room-familiar) .item-position-book{right:100px}}
 
+/* A temporary bath reward, never a permanent collectible. */
+.familiar-bath-towel{position:absolute;left:32%;top:29%;width:40%;height:13%;border-radius:50% 50% 35% 35%;background:repeating-linear-gradient(0deg,#f9f0fa 0 3px,#ddd1e6 3px 4px);border:1px solid #bfa9c9;text-align:center;font-size:17px;line-height:.5;pointer-events:none;transform:rotate(-7deg)}
+.alpaca .familiar-bath-towel{top:14%;left:34%}
+.freshly-bathed .familiar-art{filter:drop-shadow(0 0 5px #f5dafa80)}

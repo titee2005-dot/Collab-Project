@@ -1,3 +1,5 @@
+import {bathRewardActive} from '../services/petBath';
+import {collectibleItems} from '../data/collectibleItems';
 import {useEffect, useRef, useState} from 'react';
 export function FamiliarArt({kind='rabbit',awake=false,ribbon=false,charm=false,crown=false}) {
  const rabbit=kind==='rabbit';
@@ -9,10 +11,12 @@ export function FamiliarArt({kind='rabbit',awake=false,ribbon=false,charm=false,
  {charm&&<g transform={rabbit?'translate(70 107)':'translate(71 96)'} fill="#e4c183" stroke="#b6955c" strokeWidth="1.2"><path d={rabbit?'M5-7A9 9 0 1 0 9 7 8 8 0 0 1 5-7Z':'m0-10 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Z'}/></g>}
  {crown&&<path d={rabbit?'m40 47-3-15 12 6 8-13 7 13 13-6-4 15Z':'m43 27-3-15 12 6 8-13 7 13 13-6-4 15Z'} fill="#e3c17b" stroke="#b39263" strokeWidth="1.5"/>}</svg>;
 }
-export default function Familiar({recipient,total,celebrating,previewCharm=false}) {
+export default function Familiar({recipient,total,celebrating,previewCharm=false,bathState}) {
  const [greeting,setGreeting]=useState(false);const timeout=useRef(null);
  useEffect(()=>()=>clearTimeout(timeout.current),[]);
  const rabbit=recipient==='rose',awake=greeting||celebrating;
- return <div className={`room-familiar ${rabbit?'rabbit':'alpaca'} ${awake?'is-awake':''} ${total>=500?'can-wander':''}`}><button className="familiar-button" aria-label={`Say hello to ${rabbit?'Rose’s rabbit':'Praew’s alpaca'}`} onClick={()=>{setGreeting(true);clearTimeout(timeout.current);timeout.current=setTimeout(()=>setGreeting(false),2400);}}><FamiliarArt kind={rabbit?'rabbit':'alpaca'} awake={awake} ribbon={total>=100} charm={total>=750||previewCharm} crown={total>=1500}/><span className="familiar-thought" aria-hidden="true">{awake?'♡':'z z'}</span></button>{awake&&<span className="familiar-greeting" role="status">{celebrating?'A heart for us!':rabbit?'A little moonlit hello ♡':'A fluffy little hello ♡'}</span>}</div>;
+ const fresh=bathRewardActive(bathState);
+ const unlocked=kind=>collectibleItems[recipient].some(item=>item.kind===kind&&total>=item.at);
+ return <div className={`room-familiar ${rabbit?'rabbit':'alpaca'} ${fresh?'freshly-bathed':''} ${awake?'is-awake':''} ${unlocked('wand')?'can-wander':''}`}><button className="familiar-button" aria-label={`Say hello to ${rabbit?'Rose’s rabbit':'Praew’s alpaca'}`} onClick={()=>{setGreeting(true);clearTimeout(timeout.current);timeout.current=setTimeout(()=>setGreeting(false),2400);}}><FamiliarArt kind={rabbit?'rabbit':'alpaca'} awake={awake} ribbon={unlocked('ribbon')} charm={unlocked('familiar-charm')||previewCharm} crown={unlocked('crown')}/><span className="familiar-thought" aria-hidden="true">{awake?'♡':'z z'}</span></button>{fresh&&<span className="familiar-bath-towel" aria-label="เพิ่งอาบน้ำเสร็จ">🫧</span>}{awake&&<span className="familiar-greeting" role="status">{celebrating?'A heart for us!':rabbit?'A little moonlit hello ♡':'A fluffy little hello ♡'}</span>}</div>;
 }
 

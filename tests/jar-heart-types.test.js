@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {jarHeartTypes} from '../src/services/jarHeartTypes.js';
+test('small piles preserve exact per-type gifts',()=>{const types=jarHeartTypes({pink:17,ruby:1,amber:1,golden:1});assert.equal(types.length,20);for(const [id,n]of Object.entries({pink:17,ruby:1,amber:1,golden:1}))assert.equal(types.filter(t=>t===id).length,n);});
+test('compressed piles retain rare premium gifts and never invent types',()=>{const input={pink:9999,golden:1},types=jarHeartTypes(input);assert.equal(types.length,96);assert.ok(types.includes('golden'));assert.ok(types.every(t=>t==='pink'||t==='golden'));assert.deepEqual(types,jarHeartTypes(input));assert.deepEqual(jarHeartTypes({}),[]);});

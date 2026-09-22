@@ -1,4 +1,4 @@
-import {heartTypes} from '../data/heartTypes.js';
+import {heartTypes,pointsForHeart} from '../data/heartTypes.js';
 import {api} from './api.js';
 import {backend,getSupabase} from './supabaseClient.js';
 import {publicMemory} from './heartMemories.js';
@@ -20,8 +20,9 @@ export async function fetchMemories({recipient=null,type=null,search='',oldest=f
 export const getDonationById=id=>cache.find(d=>d.id===id);
 export const getRecentDonations=(donations=cache,limit=8)=>[...donations].sort((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt)).slice(0,limit);
 export function getCollectionStats(donations){
- const stats={rose:{total:0,types:Object.fromEntries(heartTypes.map(h=>[h.id,0]))},praew:{total:0,types:Object.fromEntries(heartTypes.map(h=>[h.id,0]))},total:0};
- donations.forEach(d=>{stats[d.recipient].total+=d.quantity;stats[d.recipient].types[d.heartType]=(stats[d.recipient].types[d.heartType]||0)+d.quantity;stats.total+=d.quantity;});return stats;
+ const room=()=>({total:0,points:0,types:Object.fromEntries(heartTypes.map(h=>[h.id,0]))});
+ const stats={rose:room(),praew:room(),total:0,points:0};
+ donations.forEach(d=>{const target=stats[d.recipient];if(!target)return;target.total+=d.quantity;target.points+=pointsForHeart(d.heartType,d.quantity);target.types[d.heartType]=(target.types[d.heartType]||0)+d.quantity;stats.total+=d.quantity;stats.points+=pointsForHeart(d.heartType,d.quantity);});return stats;
 }
 export function searchSupporters(query,donations=cache){
  const q=query.trim().toLowerCase();if(!q)return [];

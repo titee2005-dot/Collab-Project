@@ -128,3 +128,5 @@
 .jar-fill .jar-hearts .heart{animation:jar-heart-settle .45s ease-out both}
 @keyframes jar-heart-settle{from{translate:0 -18px;opacity:0}to{translate:0 0;opacity:1}}
 @media(prefers-reduced-motion:reduce){.jar-fill .jar-hearts .heart{animation:none}}
+/* Keep the original serif style with aligned, full-height figures. */
+.room .count strong{font-family:var(--serif);font-variant-numeric:lining-nums tabular-nums;font-feature-settings:'lnum' 1,'tnum' 1;font-weight:500;letter-spacing:0}

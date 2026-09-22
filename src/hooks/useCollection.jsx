@@ -2,10 +2,10 @@ import {createStoryQueue} from '../services/storyQueue';
 import {getNewDiscoveries} from '../services/progressionService';
 import {createContext,useContext,useEffect,useRef,useState} from 'react';
 import {refreshDonations,getCollectionStats} from '../services/donationService';
+import {pointsForHeart} from '../data/heartTypes';
 import {crossedMilestones} from '../services/memoryService';
 import {createCollectionSync} from '../services/collectionSync';
 import {createArrivalSession} from '../services/heartMemories';
-import {crossedRoomStages} from '../data/roomEvolution';
 import {backend,getSupabase} from '../services/supabaseClient';
 const Context=createContext(null);
 let arrivalSession;
@@ -18,13 +18,12 @@ export function CollectionProvider({children}){
   let storage;try{storage=sessionStorage;}catch{}arrivalSession??=createArrivalSession(storage);
   let disposed=false,timer,channel,db,readyAt=Infinity,missedWhileHidden=false,hiddenAt=document.hidden?Date.now():null,queue=[],running=false,actual=getCollectionStats([]),display=actual;
   const storyQueue=createStoryQueue({onChange:setStories});if(document.hidden)storyQueue.pause();
-  function showStats(){const next=structuredClone(actual);for(const d of queue){next[d.recipient].total=Math.max(0,next[d.recipient].total-d.quantity);next[d.recipient].types[d.heartType]=Math.max(0,next[d.recipient].types[d.heartType]-d.quantity);next.total=Math.max(0,next.total-d.quantity);}display=next;setStats(next);}
+  function showStats(){const next=structuredClone(actual);for(const d of queue){const points=pointsForHeart(d.heartType,d.quantity);next[d.recipient].total=Math.max(0,next[d.recipient].total-d.quantity);next[d.recipient].points=Math.max(0,next[d.recipient].points-points);next[d.recipient].types[d.heartType]=Math.max(0,next[d.recipient].types[d.heartType]-d.quantity);next.total=Math.max(0,next.total-d.quantity);next.points=Math.max(0,next.points-points);}display=next;setStats(next);}
   function clearArrivals(){clearTimeout(timer);queue=[];running=false;setArrival(null);setNotice(null);setEvolution(null);showStats();}
   function play(){
    if(disposed||running||!queue.length||document.hidden)return;running=true;const d=queue[0];setArrival(d);setNotice(d);setEvolution(null);
    const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-   timer=setTimeout(()=>{if(disposed)return;const before=display[d.recipient].total,sharedBefore=display.total;queue.shift();showStats();setArrival(null);setNotice({...d,landed:true,specials:getNewDiscoveries(sharedBefore,display.total)});
-    const stages=crossedRoomStages(d.recipient,before,display[d.recipient].total);if(stages.length)setEvolution({id:d.id,recipient:d.recipient,stages});
+   timer=setTimeout(()=>{if(disposed)return;const sharedBefore=display.total;queue.shift();showStats();setArrival(null);setNotice({...d,landed:true,specials:getNewDiscoveries(sharedBefore,display.total)});
     timer=setTimeout(()=>{running=false;setNotice(null);setEvolution(null);play();},1400);
    },reduced?150:1700);
   }

@@ -1,0 +1,7 @@
+.heart-options .heart-points-badge{display:block;margin-top:8px;padding:4px 7px;border-radius:20px;background:color-mix(in srgb,var(--rose) 10%,transparent);color:var(--rose);font-size:11px;line-height:1.6}
+.unlock-points-explainer{font-size:11px;line-height:1.8;color:var(--muted);margin:10px 0 16px}
+.unlock-points-summary{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:12px 14px;border-radius:10px;background:color-mix(in srgb,var(--rose) 7%,transparent);font-size:12px;color:var(--rose)}
+.room-unlock-points{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:14px 0 18px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:10px;color:var(--muted)}
+.room-unlock-points b{font-size:15px;color:var(--rose);font-weight:500}
+.guide-points{color:var(--rose)!important;font-size:9px!important;margin-top:3px}
+@media(max-width:420px){.heart-options .heart-points-badge{font-size:9px;padding:3px 4px}}

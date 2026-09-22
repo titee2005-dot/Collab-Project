@@ -1,9 +1,11 @@
 export const heartTypes = [
-  { id: 'pink', name: 'Pink Heart', color: '#e78eb3', meaning: 'Kindness', price: 20, rarity: 'common' },
-  { id: 'ruby', name: 'Ruby Heart', color: '#c44c6d', meaning: 'Passion', price: 50, rarity: 'common' },
-  { id: 'amber', name: 'Amber Heart', color: '#ed9862', meaning: 'Warmth', price: 100, rarity: 'common' },
-  { id: 'golden', name: 'Golden Heart', color: '#dfb450', meaning: 'Hope', price: 200, rarity: 'common' },
+  { id: 'pink', name: 'Pink Heart', color: '#e78eb3', meaning: 'Kindness', price: 20, unlockPoints: 1, rarity: 'common' },
+  { id: 'ruby', name: 'Ruby Heart', color: '#c44c6d', meaning: 'Passion', price: 50, unlockPoints: 3, rarity: 'common' },
+  { id: 'amber', name: 'Amber Heart', color: '#ed9862', meaning: 'Warmth', price: 100, unlockPoints: 6, rarity: 'common' },
+  { id: 'golden', name: 'Golden Heart', color: '#dfb450', meaning: 'Hope', price: 200, unlockPoints: 15, rarity: 'common' },
 ];
+const unlockPoints = Object.fromEntries(heartTypes.map(heart => [heart.id, heart.unlockPoints]));
+export const pointsForHeart = (heartType, quantity = 1) => (unlockPoints[heartType] || 0) * quantity;
 export function resolveHearts({mode = 'fixed', heartType, quantity = 1, amount}) {
   if (mode === 'amount') {
     if (!Number.isSafeInteger(amount) || amount < 20) throw new Error('Enter a whole amount of at least 20 THB.');

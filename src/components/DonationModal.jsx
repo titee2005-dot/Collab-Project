@@ -1,3 +1,4 @@
+import '../styles/unlock-points.css';
 import '../styles/payment-summary.css';
 import {useEffect,useRef,useState} from 'react';
 import Modal from './Modal';
@@ -20,17 +21,17 @@ export default function DonationModal({initialRecipient,onClose}){
  <form className="supporter-form" onSubmit={e=>{e.preventDefault();if(step)submit();else setStep(1);}}>
  {!step?<>
  <div className="recipient-options">{['rose','praew'].map(r=><button key={r} type="button" aria-pressed={form.recipient===r} className={'recipient-option '+r+(form.recipient===r?' selected':'')} onClick={()=>set('recipient',r)}><b>{r==='rose'?'Team Rose':'Team Praew'}</b><small></small></button>)}</div>
- <div className="heart-options">{heartTypes.map(h=><button key={h.id} type="button" aria-pressed={form.heartType===h.id} className={form.heartType===h.id?'selected':''} onClick={()=>set('heartType',h.id)}><Heart color={h.color}/><b>{h.name}</b><small>{h.price} THB</small></button>)}</div>
- <label>จำนวนหัวใจ<input required type="number" min="1" max="100" step="1" value={form.quantity} onChange={e=>set('quantity',e.target.value===''?'':Number(e.target.value))}/></label>
+ <div className="heart-options">{heartTypes.map(h=><button key={h.id} type="button" aria-pressed={form.heartType===h.id} className={form.heartType===h.id?'selected':''} onClick={()=>set('heartType',h.id)}><Heart color={h.color}/><b>{h.name}</b><small>{h.price} THB</small><span className="heart-points-badge">+{h.unlockPoints} คะแนน / ดวง</span></button>)}</div>
+ <p className="unlock-points-explainer">คะแนนใช้ปลดล็อกไอเทมของห้องที่เลือก แยกจากจำนวนหัวใจจริง</p><label>จำนวนหัวใจ<input required type="number" min="1" max="100" step="1" value={form.quantity} onChange={e=>set('quantity',e.target.value===''?'':Number(e.target.value))}/></label>
  <label>ชื่อที่ต้องการให้แสดง<input required={!form.anonymous} disabled={form.anonymous} maxLength={30} pattern=".*\S.*" value={form.supporterName} onChange={e=>set('supporterName',e.target.value)}/></label>
  <label className="checkbox"><input type="checkbox" checked={form.anonymous} onChange={e=>set('anonymous',e.target.checked)}/>ไม่ระบุชื่อ</label>
  <label>ข้อความ (แสดงสาธารณะ)<textarea maxLength={120} value={form.message} onChange={e=>set('message',e.target.value)}/></label>
- <p className="total-line">ยอดโดเนท <b>{heart.price*form.quantity} THB</b></p><button className="primary">ตรวจบัญชีและโอนเงิน →</button>
+ <p className="unlock-points-summary">{form.quantity||0} หัวใจ <span>เพิ่ม <b>{(heart.unlockPoints*(form.quantity||0)).toLocaleString()} คะแนนปลดล็อก</b></span></p><p className="total-line">ยอดโดเนท <b>{heart.price*form.quantity} THB</b></p><button className="primary">ตรวจบัญชีและโอนเงิน →</button>
  </>:<>
  <section className="transfer-summary" aria-label="สรุปการโอนเงิน">
   <div className="transfer-recipient"><Heart color={heart.color}/><div><span>ส่งหัวใจให้</span><h3>{form.recipient==='rose'?'โรส':'แพรว'}</h3></div></div>
   <div className="transfer-total"><span className="transfer-label">ยอดที่ต้องโอน</span><p className="transfer-amount"><strong>{(heart.price*form.quantity).toLocaleString('en-US')}</strong><span>THB</span></p><div className="transfer-heart-line"><span className="transfer-heart-name"><Heart color={heart.color}/><span>{heart.name}</span></span><b>{form.quantity} หัวใจ</b></div></div>
-  <div className="transfer-account"><h3>บัญชีรับโอน</h3><dl><div><dt>ธนาคาร</dt><dd>{account.bankName}</dd></div><div><dt>ชื่อบัญชี</dt><dd>{account.accountName}</dd></div><div className="transfer-account-number"><dt>เลขบัญชี</dt><dd>{account.accountNumber}</dd></div></dl>
+  <p className="unlock-points-summary">เพิ่ม {heart.unlockPoints*form.quantity} คะแนนปลดล็อกให้{form.recipient==='rose'?'โรส':'แพรว'}</p><div className="transfer-account"><h3>บัญชีรับโอน</h3><dl><div><dt>ธนาคาร</dt><dd>{account.bankName}</dd></div><div><dt>ชื่อบัญชี</dt><dd>{account.accountName}</dd></div><div className="transfer-account-number"><dt>เลขบัญชี</dt><dd>{account.accountNumber}</dd></div></dl>
  {qr&&<section className="payment-qr transfer-payment-qr"><img src={qr} alt={'QR รับโดเนทของ'+(form.recipient==='rose'?'โรส':'แพรว')} /><a href={qr} download>บันทึกภาพ QR</a><p>ชำระแล้วแนบสลิปด้านล่างเพื่อให้ตรวจสอบยอด</p></section>}
   </div>
  </section>

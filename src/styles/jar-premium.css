@@ -1,0 +1,10 @@
+.jar-hearts .jar-heart{position:absolute;display:block;line-height:0;pointer-events:none;filter:drop-shadow(1px 2px 1px #b45b782b);animation:jar-heart-settle .45s ease-out both}
+.jar-hearts .jar-heart>.heart{position:static!important;width:100%;height:auto;filter:none;animation:none!important;transform-origin:50% 70%;transition:filter .2s ease,transform .2s ease}
+.jar-hearts .jar-heart-ruby>.heart{transform:scale(1.12)}
+.jar-hearts .jar-heart-amber>.heart{transform:scale(1.24)}
+.jar-hearts .jar-heart-golden>.heart{transform:scale(1.38);filter:drop-shadow(0 0 2px #fff1a866)}
+.jar-heart-spark{position:absolute;top:-5%;right:-2%;font-family:Georgia,serif;font-size:10px;font-style:normal;line-height:1;color:#fff8ea;opacity:.72;transform:scale(.8);animation:jar-heart-sparkle 2.8s ease-in-out infinite}
+.jar-heart-amber .jar-heart-spark{color:#fff0c4;opacity:.8;animation-delay:-.9s}
+.jar-heart-golden .jar-heart-spark{color:#fff7cf;opacity:.92;transform:scale(1.1);animation-delay:-1.7s}
+@keyframes jar-heart-sparkle{0%,100%{opacity:.25;transform:scale(.7) rotate(-10deg)}50%{opacity:.9;transform:scale(1) rotate(8deg)}}
+@media(prefers-reduced-motion:reduce){.jar-hearts .jar-heart,.jar-heart-spark{animation:none!important}}
