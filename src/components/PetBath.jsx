@@ -174,6 +174,6 @@ export default function PetBath(){
     </div>}
    </>}
   </section>
-  <p className="pet-bath-note"><PetBathArtwork type="spark"/> เล่นฟรี · ช่วยกันวันละ 1 รอบต่อบ้าน · เริ่มวันใหม่เวลาไทย <PetBathArtwork type="spark"/></p>
+  <p className="pet-bath-note"><PetBathArtwork type="spark"/> เล่นฟรี · ยอดสะสมต่อจนสำเร็จ · สำเร็จแล้วเริ่มรอบใหม่วันถัดไป <PetBathArtwork type="spark"/></p>
  </main>;
 }
