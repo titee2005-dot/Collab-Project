@@ -36,7 +36,7 @@ export function createHandler({db,env,verify=verifySlip}){
     }
    }
    const ready=async()=>{
-    if(!live)throw error('ยังไม่เปิดรับเงินจริง',503);
+    if(!live)throw error('กิจกรรมสิ้นสุดแล้ว ปิดรับโดเนท',503);
     const config=await rpc('config',{},null,false);if(!config.enabled)throw error('บัญชีผู้รับหรือแอดมินยังตั้งค่าไม่ครบ',503);
    };
    const body=async()=>{
@@ -64,7 +64,7 @@ export function createHandler({db,env,verify=verifySlip}){
     const salt=randomHex(16);return json(await rpc('reviewer_password',{scope:b.scope,salt,passwordHash:await passwordHash(b.password,salt)},actor));
    }
    if(path==='/config'&&req.method==='GET'){
-    if(!live)return json({enabled:false,accounts:null,message:'ยังไม่เปิดรับเงินจริง กำลังตั้งค่าระบบ'});
+    if(!live)return json({enabled:false,accounts:null,message:'กิจกรรมสิ้นสุดแล้ว ปิดรับโดเนท'});
     return json(await rpc('config'));
    }
    if(path==='/donations'&&req.method==='GET')return json(await rpc('donations'));

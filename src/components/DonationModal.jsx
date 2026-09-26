@@ -1,3 +1,4 @@
+import {eventTimeLeft} from '../services/eventCountdown';
 import '../styles/unlock-points.css';
 import '../styles/payment-summary.css';
 import {useEffect,useRef,useState} from 'react';
@@ -12,9 +13,10 @@ export default function DonationModal({initialRecipient,onClose}){
  useEffect(()=>{let active=true;getPaymentConfig().then(c=>{if(active)setConfig(c);}).catch(e=>{if(active)setError(e.message);});return()=>{active=false;};},[]);
  const set=(key,value)=>{id.current=crypto.randomUUID();setForm(f=>({...f,[key]:value}));};
  const heart=heartTypes.find(h=>h.id===form.heartType);
- async function submit(){if(lock.current||!slip||!config?.enabled)return;lock.current=true;setBusy(true);setError('');try{setResult(await submitSlip(form,id.current,slip));}catch(e){setError(e.message);}finally{lock.current=false;setBusy(false);}}
+ async function submit(){if(eventTimeLeft().ended||lock.current||!slip||!config?.enabled)return;lock.current=true;setBusy(true);setError('');try{setResult(await submitSlip(form,id.current,slip));}catch(e){setError(e.message);}finally{lock.current=false;setBusy(false);}}
  if(result&&result.status!=='approved'&&result.status!=='rejected')return <Modal title="ขอบคุณสำหรับการโดเนท" onClose={onClose}><div className="payment transfer-pending"><Heart color={heart.color}/><p>กำลังรอแอดมินตรวจสอบรายการ</p></div><button className="primary full" onClick={onClose}>กลับไปที่ห้อง</button></Modal>;
  if(result)return <Modal title="ผลการส่งสลิป" onClose={onClose}><div className="payment"><Heart color={heart.color}/><b>{result.status==='approved'?'ยืนยันแล้ว ขอบคุณสำหรับโดเนท':result.status==='rejected'?'สลิปไม่ผ่านการตรวจสอบ':'รอแอดมินตรวจรายการ'}</b><p>{result.status==='approved'?'หัวใจจะปรากฏเมื่อข้อมูลอัปเดต':'ยังไม่เพิ่มหัวใจ กรุณาติดต่อแอดมิน ไม่ต้องโอนซ้ำ'}</p></div><button className="primary full" onClick={onClose}>กลับไปที่ห้อง</button></Modal>;
+ if(eventTimeLeft().ended)return <Modal title="กิจกรรมสิ้นสุดแล้ว" onClose={onClose}><p>ปิดรับโดเนทแล้ว ขอบคุณทุกหัวใจที่ร่วมกิจกรรม</p><button className="primary full" onClick={onClose}>กลับไปที่ห้อง</button></Modal>;
  if(!config?.enabled)return <Modal title="Donation" onClose={onClose}><p>{error||config?.message||'กำลังตรวจความพร้อมของระบบ…'}</p><p></p></Modal>;
  const account=config.accounts[form.recipient],qr=paymentQR(form.recipient,account);
  return <Modal title={step?'โอนเงินและส่งสลิป':'ส่งหัวใจให้คนที่คุณรัก'} onClose={()=>{if(!busy)onClose();}}>
